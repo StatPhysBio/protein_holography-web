@@ -2,16 +2,22 @@
 # from protein_holography_pytorch.utils.hcnn.prediction_parser import ...
 
 import os, sys
-
 import json
+from tqdm import tqdm
 import torch
 import numpy as np
+from e3nn import o3
+import scipy
+import torch
 
 from typing import *
 
-from protein_holography_pytorch.preprocessing_faster import get_zernikegrams_from_structures
+from protein_holography_web.cg_coefficients import get_w3j_coefficients
+from protein_holography_web.models import SO3_ConvNet, CGNet
 
-from protein_holography_pytorch.utils.hcnn.prediction_parser import get_region_metrics, average_region_metrics
+from protein_holography_web.protein_processing.pipeline import get_zernikegrams_from_pdbfile
+from protein_holography_web.utils.data import ZernikegramsDataset
+from protein_holography_web.utils.protein_naming import ol_to_ind_size, ind_to_ol_size
 
 
 def get_channels(channels_str):
@@ -36,8 +42,6 @@ def get_channels(channels_str):
 
 
 def get_data_irreps(hparams):
-    import numpy as np
-    from e3nn import o3
 
     channels = get_channels(hparams['channels'])
     
@@ -64,10 +68,6 @@ def load_hcnn_models(model_dirs: List[str]):
     '''
     Assume that all models have the same hparams and same data_irreps
     '''
-
-    from protein_holography_pytorch.cg_coefficients import get_w3j_coefficients
-    from protein_holography_pytorch.models import SO3_ConvNet, CGNet
-
     
     models = []
     for model_dir in model_dirs:
@@ -110,13 +110,14 @@ def load_hcnn_models(model_dirs: List[str]):
     return models, hparams # assume that all models have the same hparams and same data_irreps
 
 
-# def predict_from_hdf5(
+def predict_from_hdf5file(*args, **kwargs):
+    raise NotImplementedError
 
 
-def predict_from_pdbfiles(pdb_files: List[str],
-                          models,
+def predict_from_pdbfile(pdb_file: str,
+                          models: List,
                           hparams: List[Dict],
-                          max_atoms: int = 100000): # mnight have to change max_atoms to make sure all possible atoms are included
+                          batch_size: int): # might have to change max_atoms to make sure all possible atoms are included
     '''
     '''
 
@@ -137,12 +138,19 @@ def predict_from_pdbfiles(pdb_files: List[str],
     #     get_residues = None
     get_residues = None
 
+    get_structural_info_kwargs = {'padded_length': None,
+                                  'SASA': True,
+                                  'charge': True,
+                                  'DSSP': False,
+                                  'angles': False,
+                                  'fix': True,
+                                  'hydrogens': True,
+                                  'multi_struct': 'warn'}
 
     get_neighborhoods_kwargs = {'r_max': hparams['rcut'],
                                 'remove_central_residue': hparams['remove_central_residue'],
                                 'backbone_only': set(hparams['channels']) == set(['CA', 'C', 'O', 'N']),
                                 'get_residues': get_residues}
-
 
     get_zernikegrams_kwargs = {'r_max': hparams['rcut'],
                                'radial_func_mode': hparams['radial_func_mode'],
@@ -153,44 +161,53 @@ def predict_from_pdbfiles(pdb_files: List[str],
                                'request_frame': False,
                                'get_physicochemical_info_for_hydrogens': hparams['get_physicochemical_info_for_hydrogens'],
                                'rst_normalization': hparams['rst_normalization']}
-
-    zgrams_dict = get_zernikegrams_from_structures(pose, get_neighborhoods_kwargs, get_zernikegrams_kwargs, max_atoms)
-
-
-    # predict_from_zernikegrams()
+    
+    zgrams_dict = get_zernikegrams_from_pdbfile(pdb_file, get_structural_info_kwargs, get_neighborhoods_kwargs, get_zernikegrams_kwargs)
+    
+    ensemble_predictions_dict = predict_from_zernikegrams(zgrams_dict['zernikegrams'], zgrams_dict['res_id'], models, batch_size, data_irreps)
+    
+    return ensemble_predictions_dict
 
 
 
 def predict_from_zernikegrams(
-    zernikegrams: np.ndarray,
-    models,
-    hparams: List[Dict],
-    data_irreps,
-    ls_indices
+    np_zgrams: np.ndarray,
+    np_res_ids: np.ndarray,
+    models: List,
+    batch_size: int,
+    data_irreps: o3.Irreps,
 ):
-    '''
-    '''
+    N = np_zgrams.shape[0]
+    aas = np_res_ids[:, 0]
+    labels = np.array([ol_to_ind_size[x.decode('utf-8')] for x in aas])
 
-    # TODO continue this
+    frames = np.zeros((N, 3, 3)) # dummy frames
+    dataset = ZernikegramsDataset(np_zgrams, data_irreps, labels, list(zip(list(frames), list(map(tuple, np_res_ids)))))
+
+    ensemble_predictions_dict = {'embeddings': [], 'logits': [], 'probabilities': [], 'best_indices': [], 'targets': None, 'res_ids': np_res_ids}
     for model in models:
-        pass
 
-        # model.predict()
+        # not sure if I should run re-instantiate the dataloader?
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
-        # predict(self,
-        #         dataloader: torch.utils.data.DataLoader,
-        #         emb_i: int = -1,
-        #         device: str = 'cpu',
-        #         verbose: bool = False,
-        #         loading_bar: bool = False) -> Dict:
+        curr_model_predictions_dict = model.predict(dataloader, device='cuda' if torch.cuda.is_available() else 'cpu')
 
-        # return {
-        #     'embeddings': embeddings_all,
-        #     'logits': y_hat_all_logits,
-        #     'probabilities': softmax(y_hat_all_logits, axis=-1),
-        #     'best_indices': y_hat_all_index,
-        #     'targets': y_all,
-        #     'res_ids': res_ids_all
-        # }
+        assert ensemble_predictions_dict['res_ids'][:5, :] == curr_model_predictions_dict['res_ids'][:5, :] # sanity check that order of stuff is preserved
 
+        ensemble_predictions_dict['embeddings'].append(curr_model_predictions_dict['embeddings'])
+        ensemble_predictions_dict['logits'].append(curr_model_predictions_dict['logits'])
+        ensemble_predictions_dict['probabilities'].append(curr_model_predictions_dict['probabilities'])
+        ensemble_predictions_dict['best_indices'].append(curr_model_predictions_dict['best_indices'])
+
+        if ensemble_predictions_dict['targets'] is None:
+            ensemble_predictions_dict['targets'] = curr_model_predictions_dict['targets']
+        else:
+            assert ensemble_predictions_dict['targets'][:10] == curr_model_predictions_dict['targets'][:10]
+
+    ensemble_predictions_dict['embeddings'] = np.stack(ensemble_predictions_dict['embeddings'], axis=0) # TODO return concatenated versions of embeddings instead
+    ensemble_predictions_dict['logits'] = np.stack(ensemble_predictions_dict['logits'], axis=0)
+    ensemble_predictions_dict['probabilities'] = np.stack(ensemble_predictions_dict['probabilities'], axis=0)
+    ensemble_predictions_dict['best_indices'] = np.stack(ensemble_predictions_dict['best_indices'], axis=0)
+
+    return ensemble_predictions_dict
 

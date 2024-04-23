@@ -253,7 +253,7 @@ class SO3_ConvNet(torch.nn.Module):
         return {
             'embeddings': embeddings_all,
             'logits': y_hat_all_logits,
-            'probabilities': softmax(y_hat_all_logits, axis=-1),
+            'probabilities': softmax(y_hat_all_logits.astype(np.float64), axis=-1),
             'best_indices': y_hat_all_index,
             'targets': y_all,
             'res_ids': res_ids_all
