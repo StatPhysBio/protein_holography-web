@@ -3,10 +3,11 @@ import sys, os
 
 import numpy as np
 import torch
-import e3nn
 from e3nn import o3
-from protein_holography_pytorch import nn
-from protein_holography_pytorch.utils.data import NeighborhoodsDataset
+from protein_holography_web import nn
+
+from protein_holography_web.utils.data import put_dict_on_device
+from tqdm import tqdm
 
 from torch import Tensor
 from typing import *
@@ -123,9 +124,6 @@ class CGNet(torch.nn.Module):
                 verbose: bool = False,
                 loading_bar: bool = False,
                 **kwargs) -> Dict: # kwargs are there for compatibility with other scripts
-        from torch.utils.data import DataLoader
-        from protein_holography_pytorch.so3.functional import put_dict_on_device
-        from tqdm import tqdm
 
         if loading_bar:
             loading_bar = tqdm

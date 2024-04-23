@@ -11,11 +11,12 @@ from protein_holography_web.utils.conversions import change_basis_complex_to_rea
 from protein_holography_web.utils.log_config import format
 
 from protein_holography_web.protein_processing.constants import BACKBONE_ATOMS, N, CA, C, O, EMPTY_ATOM_NAME
+from protein_holography_web.utils.protein_naming import ol_to_ind_size
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format=format)
 
-cob_mats = np.load(os.path.join(os.path.abspat(__file__), 'YZX_XYZ_cob.npy'), allow_pickle=True)[()]
+cob_mats = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'YZX_XYZ_cob.npy'), allow_pickle=True)[()]
 
 
 def get_zernikegrams(nbs: np.ndarray, # of custom dtype

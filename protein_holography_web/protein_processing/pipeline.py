@@ -1,11 +1,11 @@
 
-from structural_info import get_structural_info
-from neighborhoods import get_neighborhoods
-from zernikegrams import get_zernikegrams
+from .structural_info import get_structural_info
+from .neighborhoods import get_neighborhoods
+from .zernikegrams import get_zernikegrams
 
 from typing import *
 
-# @profile
+
 def get_zernikegrams_from_pdbfile(pdbfile: str,
                                      get_structural_info_kwargs: Dict,
                                      get_neighborhoods_kwargs: Dict,

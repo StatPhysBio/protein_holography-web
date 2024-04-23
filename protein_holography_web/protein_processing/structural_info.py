@@ -1,4 +1,5 @@
-import os
+
+import os, sys
 import tempfile
 
 from Bio.PDB import (
@@ -43,20 +44,9 @@ def get_structural_info(pdb_file: str,
         for i in range(1, len(pdb_file)):
             L = max(L, len(pdb_file[i].split('/')[-1].split('.')[0]))
 
-    dt = np.dtype([
-        ('pdb',f'S{L}',()),
-        ('atom_names', 'S4', (padded_length)),
-        ('elements', 'S2', (padded_length)),
-        ('res_ids', f'S{L}', (padded_length, 6)),
-        ('coords', 'f4', (padded_length, 3)),
-        ('SASAs', 'f4', (padded_length)),
-        ('charges', 'f4', (padded_length)),
-    ])
-
     if isinstance(pdb_file, str):
         pdb_file = [pdb_file]
     
-    np_protein = np.zeros(shape=(len(pdb_file),), dtype=dt) 
 
     n = 0
     for i, pdb_file in enumerate(pdb_file):
@@ -84,9 +74,38 @@ def get_structural_info(pdb_file: str,
                     multi_struct=multi_struct)
 
         if si[0] is None:
+            print(f"Failed to process {pdb_file}", file=sys.stderr)
             continue
 
-        pdb,atom_names,elements,res_ids,coords,sasas,charges,res_ids_per_residue,angles,vecs, = si
+        try:
+            pdb,atom_names,elements,res_ids,coords,sasas,charges,res_ids_per_residue,angles,vecs = si
+        except ValueError:
+            pdb,(atom_names,elements,res_ids,coords,sasas,charges,res_ids_per_residue,angles,vecs) = si
+
+        if n == 0:
+            if padded_length is None:
+                length = len(atom_names)
+                dt = np.dtype([
+                    ('pdb',f'S{L}',()),
+                    ('atom_names', 'S4', (length)),
+                    ('elements', 'S2', (length)),
+                    ('res_ids', f'S{L}', (length, 6)),
+                    ('coords', 'f4', (length, 3)),
+                    ('SASAs', 'f4', (length)),
+                    ('charges', 'f4', (length)),
+                ])
+            else:
+                dt = np.dtype([
+                    ('pdb',f'S{L}',()),
+                    ('atom_names', 'S4', (padded_length)),
+                    ('elements', 'S2', (padded_length)),
+                    ('res_ids', f'S{L}', (padded_length, 6)),
+                    ('coords', 'f4', (padded_length, 3)),
+                    ('SASAs', 'f4', (padded_length)),
+                    ('charges', 'f4', (padded_length)),
+                ])
+            
+            np_protein = np.zeros(shape=(len(pdb_file),), dtype=dt)
 
         np_protein[n] = (pdb,atom_names,elements,res_ids,coords,sasas,charges,)
         

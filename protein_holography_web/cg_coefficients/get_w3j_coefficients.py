@@ -4,7 +4,7 @@ import gzip, pickle
 import e3nn
 from e3nn import o3
 
-curr_file_path = os.path.abspath(__file__)
+curr_file_path = os.path.dirname(os.path.abspath(__file__))
 
 def download_w3j_coefficients(lmax=14):
     print('e3nn version: ', e3nn.__version__)

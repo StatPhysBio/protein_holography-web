@@ -1,6 +1,4 @@
 
-# from protein_holography_pytorch.utils.hcnn.prediction_parser import ...
-
 import os, sys
 import json
 from tqdm import tqdm
@@ -164,7 +162,7 @@ def predict_from_pdbfile(pdb_file: str,
     
     zgrams_dict = get_zernikegrams_from_pdbfile(pdb_file, get_structural_info_kwargs, get_neighborhoods_kwargs, get_zernikegrams_kwargs)
     
-    ensemble_predictions_dict = predict_from_zernikegrams(zgrams_dict['zernikegrams'], zgrams_dict['res_id'], models, batch_size, data_irreps)
+    ensemble_predictions_dict = predict_from_zernikegrams(zgrams_dict['zernikegram'], zgrams_dict['res_id'], models, batch_size, data_irreps)
     
     return ensemble_predictions_dict
 
@@ -192,7 +190,7 @@ def predict_from_zernikegrams(
 
         curr_model_predictions_dict = model.predict(dataloader, device='cuda' if torch.cuda.is_available() else 'cpu')
 
-        assert ensemble_predictions_dict['res_ids'][:5, :] == curr_model_predictions_dict['res_ids'][:5, :] # sanity check that order of stuff is preserved
+        assert (ensemble_predictions_dict['res_ids'][:5, :] == curr_model_predictions_dict['res_ids'].T[:5, :]).all() # sanity check that order of stuff is preserved, have to transpose it for some reason
 
         ensemble_predictions_dict['embeddings'].append(curr_model_predictions_dict['embeddings'])
         ensemble_predictions_dict['logits'].append(curr_model_predictions_dict['logits'])
@@ -202,7 +200,7 @@ def predict_from_zernikegrams(
         if ensemble_predictions_dict['targets'] is None:
             ensemble_predictions_dict['targets'] = curr_model_predictions_dict['targets']
         else:
-            assert ensemble_predictions_dict['targets'][:10] == curr_model_predictions_dict['targets'][:10]
+            assert (ensemble_predictions_dict['targets'][:10] == curr_model_predictions_dict['targets'][:10]).all()
 
     ensemble_predictions_dict['embeddings'] = np.stack(ensemble_predictions_dict['embeddings'], axis=0) # TODO return concatenated versions of embeddings instead
     ensemble_predictions_dict['logits'] = np.stack(ensemble_predictions_dict['logits'], axis=0)

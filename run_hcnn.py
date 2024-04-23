@@ -6,8 +6,8 @@ Change this a bunch:
 # 1. Make user select what to return. Whether probabilities, logits, embeddings, or combinations of them. --> DONE
 # 2. Make the output be a single .csv file with the res_ids and the requested data. Rows are sites --> DONE BUT NEED TO TEST
 3. Make the .txt (multi-pdb) option *optionally* split the output by pdb file, and assign pdbid name to each output file.
-4. Use different inference code. Namely, the inference code of TCRpMHC stuff
-5. Change model_dir to be the model config name
+# 4. Use different inference code. Namely, the inference code of TCRpMHC stuff
+# 5. Change model_dir to be the model config name
 
 '''
 
@@ -15,16 +15,13 @@ import os, sys
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-
 from time import time
+from sklearn.metrics import accuracy_score
 
 from protein_holography_web.inference.hcnn_inference import predict_from_hdf5file, predict_from_pdbfile, load_hcnn_models
-
-import argparse
-
 from protein_holography_web.utils.protein_naming import ind_to_ol_size, ol_to_ind_size
 
-from sklearn.metrics import accuracy_score
+import argparse
 
 
 def check_input_arguments(args):
@@ -46,7 +43,7 @@ if __name__ == '__main__':
                         help='Directory containing PDB files to run inference on. Inference is run on all sites in the structure. Cannot be specified together with --hdf5_file.')
     
     parser.add_argument('-o', '--output_filepath', type=str, required=True,
-                        help='Must be a ".csv file". Embeddings will be saved separately, in a parallel array, with the same filename but with the extension "-embeddings.npz".')
+                        help='Must be a ".csv file". Embeddings will be saved separately, in a parallel array, with the same filename but with the extension "-embeddings.npy".')
     
     parser.add_argument('-r', '--request', nargs='+', type=str, default='probas', choices=['logprobas', 'probas', 'embeddings', 'logits'],
                         help='Which data to return. Can be a combination of "logprobas", "probas", "embeddings", and "logits".')
@@ -55,10 +52,10 @@ if __name__ == '__main__':
                         help='Batch size for the model.\n'
                              'Will not make a difference if running inference on one PDB at a time (i.e. --pdb_processing is set to "one_at_a_time").')
 
-    parser.add_argument('--verbose', type=int, default=0, choices=[0, 1],
+    parser.add_argument('-v', '--verbose', type=int, default=0, choices=[0, 1],
                         help='0 for no, 1 for yes.')
 
-    parser.add_argument('--loading_bar', type=int, default=1, choices=[0, 1],
+    parser.add_argument('-lb', '--loading_bar', type=int, default=1, choices=[0, 1],
                         help='0 for no, 1 for yes.')
         
     args = parser.parse_args()
@@ -66,61 +63,94 @@ if __name__ == '__main__':
 
     check_input_arguments(args)
 
-    model_dir_list = os.listdir(os.path.join(os.path.abspath(__file__), 'trained_models', args.model_version))
+    trained_models_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trained_models', args.model_version)
+    model_dir_list = [os.path.join(trained_models_path, model_rel_path) for model_rel_path in os.listdir(trained_models_path)]
     models, hparams = load_hcnn_models(model_dir_list)
 
 
-    if args.hdf5_file is not None:
+    ## prepare header of csv file, initialize output dataframe and embeddings
+    res_id_fields = np.array(['resname', 'pdb', 'chain', 'resnum', 'insertion_code', 'secondary_structure'])
+    indices_of_res_ids = np.array([1, 2, 0, 3, 4]) # rearrange to put pdb in front, and remove secondary structure, here as single point of truth
+    res_id_fields = res_id_fields[indices_of_res_ids]
+    data_columns = []
+    for request in args.request:
+        if request == 'probas':
+            data_columns.extend([f'proba_{ind_to_ol_size[i]}' for i in range(len(ind_to_ol_size))]) # len(ind_to_ol_size) == num aminoacids
+        elif request == 'logprobas':
+            data_columns.extend([f'logproba_{ind_to_ol_size[i]}' for i in range(len(ind_to_ol_size))])
+        elif request == 'logits':
+            data_columns.extend([f'logit_{ind_to_ol_size[i]}' for i in range(len(ind_to_ol_size))])
+    columns = np.concatenate([res_id_fields, data_columns])
+    df_out = pd.DataFrame(columns=columns)
+    embeddings_out = [] if 'embeddings' in args.request else None
 
-        print(f'Running inference on zernikegrams in the .hdf5 file: {args.hdf5_file}')
+
+    def update_output(inference, df, embeddings=None):
+
+        all_res_ids = inference['res_ids'].astype(str)
+        all_res_ids = all_res_ids[:, indices_of_res_ids] # rearrange to put pdb in front, and remove secondary structure
+
+        ## average the data of the ensemble
+        inference['probabilities'] = np.mean(inference['probabilities'], axis=0)
+        inference['logits'] = np.mean(inference['logits'], axis=0)
+        inference['embeddings'] = np.mean(inference['embeddings'], axis=0)
+
+        additional_data = []
+        for request in args.request:
+            if request == 'probas':
+                additional_data.append(inference['probabilities'])
+            elif request == 'logprobas':
+                additional_data.append(np.log(inference['probabilities']))
+            elif request == 'logits':
+                additional_data.append(inference['logits'])
+        additional_data = np.concatenate(additional_data, axis=1)
+
+        data = np.concatenate([all_res_ids, additional_data], axis=1)
+
+        df = pd.concat([df, pd.DataFrame(data, columns=columns)], axis=0)
+
+        if embeddings is not None:
+            if len(embeddings) == 0:
+                embeddings = inference['embeddings']
+            else:
+                embeddings = np.concatenate([embeddings, inference['embeddings']], axis=0)
+        
+        return df, embeddings
+
+
+    ## run inference
+    if args.hdf5_file is not None:
+        if args.verbose: print(f'Running inference on zernikegrams in the .hdf5 file: {args.hdf5_file}')
         inference = predict_from_hdf5file()
-        print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
+        if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
 
     elif args.pdb_dir is not None:
-
         pdb_files = [os.path.join(args.pdb_dir, pdb) for pdb in os.listdir(args.pdb_dir) if pdb.endswith('.pdb')]
-        print(f'Running inference on {len(pdb_files)} pdb files found in: {args.pdb_dir}')
+        if args.verbose: print(f'Running inference on {len(pdb_files)} pdb files found in: {args.pdb_dir}')
 
-        inference = predict_from_pdbfile(pdb_files, models, hparams, args.batch_size, loading_bar=args.loading_bar)
+        if args.loading_bar:
+            pdb_files = tqdm(pdb_files, total=len(pdb_files))
 
-        if len(inference['best_indices'].shape) == 2:
-            print('Accuracy of first model in ensemble: %.3f' % accuracy_score(inference['targets'], inference['best_indices'][0, :]))
-        else:
-            print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
+        for pdbfile in pdb_files:
+            inference = predict_from_pdbfile(pdbfile, models, hparams, args.batch_size)
+
+            if len(inference['best_indices'].shape) == 2:
+                if args.verbose: print('Accuracy of first model in ensemble: %.3f' % accuracy_score(inference['targets'], inference['best_indices'][0, :]))
+            else:
+                if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
+            
+            df_out, embeddings_out = update_output(inference, df_out, embeddings_out)
 
     else:
         raise ValueError('Either --hdf5_file or --pdb_dir must be specified.')
 
-    
-    ## save res_ids to csv file so they are easily indexable
-    ## save embeddings and/or logits in individual numpy arrays
-    all_res_ids = inference['res_ids']
 
-    all_res_ids = np.vstack([np.array(res_id.split('_')) for res_id in all_res_ids])
-    columns = np.array(['resname', 'pdb', 'chain', 'resnum', 'insertion_code', 'secondary_structure'])
-    all_res_ids = np.vstack([columns.reshape(1, -1), all_res_ids])
-    all_res_ids = all_res_ids[:, np.array([1, 2, 0, 3, 4])] # rearrange to put pdb in front, and remove secondary structure
-    columns = all_res_ids[0]
-    all_res_ids = all_res_ids[1:]
+    ## save output
+    if args.verbose: print(f'Saving [residue ids, {", ".join([req for req in args.request if req != "embeddings"])}] output to: {args.output_filepath}')
 
-    additional_columns = []
-    additional_data = []
-    for request in args.request:
-        if request == 'probas':
-            additional_columns.extend([f'proba_{ind_to_ol_size[i]}' for i in range(len(ind_to_ol_size))]) # len(ind_to_ol_size) == num aminoacids
-            additional_data.append(inference['probabilities'])
-        elif request == 'logprobas':
-            additional_columns.extend([f'logproba_{ind_to_ol_size[i]}' for i in range(len(ind_to_ol_size))])
-            additional_data.append(np.log(inference['probabilities']))
-        elif request == 'logits':
-            additional_columns.extend([f'logit_{ind_to_ol_size[i]}' for i in range(len(ind_to_ol_size))])
-            additional_data.append(inference['logits'])
-    
-    columns = np.concatenate([columns, additional_columns])
-    data = np.hstack([all_res_ids, np.hstack(additional_data)])
-    pd.DataFrame(all_res_ids, columns=columns).to_csv(args.output_filepath, index=False)
-
+    df_out.to_csv(args.output_filepath, index=False)
     if 'embeddings' in args.request:
-        np.savez(args.output_filepath[:-4] + '-embeddings.npz', inference['embeddings'])
+        if args.verbose: print(f'Saving embeddings to: {args.output_filepath[:-4] + "-embeddings.npy"}')
+        np.save(args.output_filepath[:-4] + '-embeddings.npy', embeddings_out)
 
     
