@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from time import time
+from scipy.special import softmax, log_softmax
 from sklearn.metrics import accuracy_score
 
 from protein_holography_web.inference.hcnn_inference import predict_from_hdf5file, predict_from_pdbfile, load_hcnn_models
@@ -27,8 +28,8 @@ import argparse
 def check_input_arguments(args):
     assert args.output_filepath.endswith('.csv'), '--output_filepath must be a ".csv" file.'
     assert args.request, 'At least one of --request must be specified.'
-    assert args.hdf5_file or args.pdb_dir, 'Either --hdf5_file or --pdb_dir must be specified.'
-    assert not (args.hdf5_file and args.pdb_dir), 'Cannot specify both --hdf5_file and --pdb_dir.'
+    assert args.hdf5_file or args.folder_with_pdbs, 'Either --hdf5_file or --folder_with_pdbs must be specified.'
+    assert not (args.hdf5_file and args.folder_with_pdbs), 'Cannot specify both --hdf5_file and --folder_with_pdbs.'
 
 
 if __name__ == '__main__':
@@ -37,9 +38,9 @@ if __name__ == '__main__':
                         help='Name of HCNN model you want to use. E.g. "HCNN_0p50" is HCNN trained with 0.50 Angstrom noise.')
     
     parser.add_argument('-hf', '--hdf5_file', type=str, default=None,
-                        help='Path to an .hdf5 file containing zernikegrams and res_ids to run inference on. Cannot be specified together with --pdb_dir.')
+                        help='Path to an .hdf5 file containing zernikegrams and res_ids to run inference on. Cannot be specified together with --folder_with_pdbs.')
     
-    parser.add_argument('-pd', '--pdb_dir', type=str, default=None,
+    parser.add_argument('-pd', '--folder_with_pdbs', type=str, default=None,
                         help='Directory containing PDB files to run inference on. Inference is run on all sites in the structure. Cannot be specified together with --hdf5_file.')
     
     parser.add_argument('-o', '--output_filepath', type=str, required=True,
@@ -47,6 +48,9 @@ if __name__ == '__main__':
     
     parser.add_argument('-r', '--request', nargs='+', type=str, default='probas', choices=['logprobas', 'probas', 'embeddings', 'logits'],
                         help='Which data to return. Can be a combination of "logprobas", "probas", "embeddings", and "logits".')
+    
+    parser.add_argument('-el', '--ensemble_at_logits_level', default=0, type=int, choices=[0, 1],
+                        help="1 for True, 0 for False. When computing probabilities and log-probabilities, ensembles the logits before computing the softmax, as opposed to ansembling the individual models' probabilities. There should not be a big difference, unless the ensembled models are trained very differently.")
     
     parser.add_argument('-bs', '--batch_size', type=int, default=512,
                         help='Batch size for the model.\n'
@@ -98,9 +102,15 @@ if __name__ == '__main__':
         additional_data = []
         for request in args.request:
             if request == 'probas':
-                additional_data.append(inference['probabilities'])
+                if args.ensemble_at_logits_level:
+                    additional_data.append(softmax(inference['logits'].astype(np.int64), axis=1))
+                else:
+                    additional_data.append(inference['probabilities'])
             elif request == 'logprobas':
-                additional_data.append(np.log(inference['probabilities']))
+                if args.ensemble_at_logits_level:
+                    additional_data.append(log_softmax(inference['logits'].astype(np.int64), axis=1))
+                else:
+                    additional_data.append(np.log(inference['probabilities']))
             elif request == 'logits':
                 additional_data.append(inference['logits'])
         additional_data = np.concatenate(additional_data, axis=1)
@@ -124,9 +134,9 @@ if __name__ == '__main__':
         inference = predict_from_hdf5file()
         if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
 
-    elif args.pdb_dir is not None:
-        pdb_files = [os.path.join(args.pdb_dir, pdb) for pdb in os.listdir(args.pdb_dir) if pdb.endswith('.pdb')]
-        if args.verbose: print(f'Running inference on {len(pdb_files)} pdb files found in: {args.pdb_dir}')
+    elif args.folder_with_pdbs is not None:
+        pdb_files = [os.path.join(args.folder_with_pdbs, pdb) for pdb in os.listdir(args.folder_with_pdbs) if pdb.endswith('.pdb')]
+        if args.verbose: print(f'Running inference on {len(pdb_files)} pdb files found in: {args.folder_with_pdbs}')
 
         if args.loading_bar:
             pdb_files = tqdm(pdb_files, total=len(pdb_files))
@@ -142,7 +152,7 @@ if __name__ == '__main__':
             df_out, embeddings_out = update_output(inference, df_out, embeddings_out)
 
     else:
-        raise ValueError('Either --hdf5_file or --pdb_dir must be specified.')
+        raise ValueError('Either --hdf5_file or --folder_with_pdbs must be specified.')
 
 
     ## save output

@@ -71,7 +71,7 @@
         "filter_symmetric": true,
         "input_normalizing_constant": 1.7929998611100528
     },
-    "n_epochs": 10,
+    "n_epochs": 15,
     "lr": 0.001,
     "lr_scheduler": "reduce_lr_on_plateau",
     "batch_size": 512,

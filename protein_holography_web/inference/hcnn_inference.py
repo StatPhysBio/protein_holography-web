@@ -115,26 +115,26 @@ def predict_from_hdf5file(*args, **kwargs):
 def predict_from_pdbfile(pdb_file: str,
                           models: List,
                           hparams: List[Dict],
-                          batch_size: int): # might have to change max_atoms to make sure all possible atoms are included
+                          batch_size: int,
+                          regions: Optional[Dict[str, List[Tuple[str, int, str]]]] = None):
     '''
     '''
 
     data_irreps, ls_indices = get_data_irreps(hparams)
 
-    ## this code template would be useful to limit the number of residues to compute zernikegrams - and do inference - for
-    # if compute_zgrams_only_for_requested_regions:
-    #     def get_residues(np_protein):
-    #         res_ids = np.unique(np_protein['res_ids'], axis=0)
-    #         all_res_ids_info_we_care_about = res_ids[:, 2:5]
-    #         region_ids = []
-    #         for region_name in regions:
-    #             region_ids.extend(regions[region_name])
-    #         region_ids = np.unique(np.array(region_ids).astype(all_res_ids_info_we_care_about.dtype), axis=0)
-    #         indices = np.where(np.isin(all_res_ids_info_we_care_about, region_ids).all(axis=1))[0]
-    #         return res_ids[indices]
-    # else:
-    #     get_residues = None
-    get_residues = None
+    # this code template would be useful to limit the number of residues to compute zernikegrams - and do inference - for
+    if regions is not None:
+        def get_residues(np_protein):
+            res_ids = np.unique(np_protein['res_ids'], axis=0)
+            all_res_ids_info_we_care_about = res_ids[:, 2:5]
+            region_ids = []
+            for region_name in regions:
+                region_ids.extend(regions[region_name])
+            region_ids = np.unique(np.array(region_ids).astype(all_res_ids_info_we_care_about.dtype), axis=0)
+            indices = np.where(np.isin(all_res_ids_info_we_care_about, region_ids).all(axis=1))[0]
+            return res_ids[indices]
+    else:
+        get_residues = None
 
     get_structural_info_kwargs = {'padded_length': None,
                                   'SASA': True,
@@ -161,8 +161,13 @@ def predict_from_pdbfile(pdb_file: str,
                                'rst_normalization': hparams['rst_normalization']}
     
     zgrams_dict = get_zernikegrams_from_pdbfile(pdb_file, get_structural_info_kwargs, get_neighborhoods_kwargs, get_zernikegrams_kwargs)
-    
-    ensemble_predictions_dict = predict_from_zernikegrams(zgrams_dict['zernikegram'], zgrams_dict['res_id'], models, batch_size, data_irreps)
+
+    if regions is None: # return the predictions
+        ensemble_predictions_dict = predict_from_zernikegrams(zgrams_dict['zernikegram'], zgrams_dict['res_id'], models, batch_size, data_irreps)
+    else: # return the predictions for each region, in a dict indexed by region_name
+        ensemble_predictions_dict = {}
+        for region_name in regions:
+            ensemble_predictions_dict[region_name] = predict_from_zernikegrams(zgrams_dict['zernikegram'], zgrams_dict['res_id'], models, batch_size, data_irreps, region=regions[region_name])
     
     return ensemble_predictions_dict
 
@@ -174,7 +179,15 @@ def predict_from_zernikegrams(
     models: List,
     batch_size: int,
     data_irreps: o3.Irreps,
+    region: Optional[List[Tuple[str, int, str]]] = None,
 ):
+    if region is not None:
+        region_idxs = get_res_locs_from_tups(np_res_ids, region)
+        if len(region_idxs.shape) == 0:
+            region_idxs = region_idxs.reshape([1]) # if only one residue, make it still a 1D array instead of a scalar so that stuff doesn't break later
+        np_zgrams = np_zgrams[region_idxs]
+        np_res_ids = np_res_ids[region_idxs]
+
     N = np_zgrams.shape[0]
     aas = np_res_ids[:, 0]
     labels = np.array([ol_to_ind_size[x.decode('utf-8')] for x in aas])
@@ -208,4 +221,22 @@ def predict_from_zernikegrams(
     ensemble_predictions_dict['best_indices'] = np.stack(ensemble_predictions_dict['best_indices'], axis=0)
 
     return ensemble_predictions_dict
+
+
+
+def make_string_from_tup(x):
+    return (x[0] + str(x[1]) + x[2]).encode()
+
+def get_res_locs_from_tups(
+    nh_ids: List,
+    loc_tups: List
+) -> np.ndarray:
+    """Get indices of specific residues based on their residue ids"""
+    nh_string_ids = np.array([b''.join(x) for x in nh_ids[:,2:5]])
+    loc_string_ids = np.array([make_string_from_tup(x) for x in loc_tups])
+    return np.squeeze(np.argwhere(
+        np.logical_or.reduce(
+            nh_string_ids[None,:] == loc_string_ids[:,None])))
+
+
 
