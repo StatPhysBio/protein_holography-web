@@ -111,7 +111,7 @@ def load_hcnn_models(model_dirs: List[str]):
 def predict_from_hdf5file(*args, **kwargs):
     raise NotImplementedError
 
-
+# @profile
 def predict_from_pdbfile(pdb_file: str,
                           models: List,
                           hparams: List[Dict],
@@ -172,7 +172,7 @@ def predict_from_pdbfile(pdb_file: str,
     return ensemble_predictions_dict
 
 
-
+# @profile
 def predict_from_zernikegrams(
     np_zgrams: np.ndarray,
     np_res_ids: np.ndarray,

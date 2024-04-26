@@ -182,7 +182,7 @@ def get_padded_structural_info(
 
     return (pdb, *mat_structural_info)
 
-
+# @profile
 def get_structural_info_from_protein(
     pdb_file: str,
     remove_nonwater_hetero: bool = False,

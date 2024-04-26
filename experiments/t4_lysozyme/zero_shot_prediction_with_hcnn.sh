@@ -10,7 +10,7 @@ for model_version in $model_version_list
     for use_mt_structure in $use_mt_structure_list
         do
 
-        python -u ../../zero_shot_mutation_effect_prediction_with_hcnn__fast.py \
+        python -u ../../zero_shot_mutation_effect_prediction_with_hcnn.py \
                             --model_version $model_version \
                             --csv_file $base_dir'T4_mutant_ddG_standardized.csv' \
                             --folder_with_pdbs $base_dir'pdbs' \

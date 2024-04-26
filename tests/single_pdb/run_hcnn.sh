@@ -1,6 +1,6 @@
 
 
-python -u ../../run_hcnn.py \
+python -u ../../run_hcnn_on_pdbfiles.py \
                 -m HCNN_0p00 \
                 -pd pdbs \
                 -o single_pdb_output.csv \
