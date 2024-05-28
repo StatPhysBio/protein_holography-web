@@ -48,7 +48,15 @@ def get_file_that_matches_specs(inference_dir, model_version, pdb, chain, resnum
             return file
 
 # @profile
+import stopit
+
+@stopit.threading_timeoutable(60*10) # stop it if it takes more than 10 minutes
 def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, models, hparams, ensemble_at_logits_level):
+
+    ## do not make predictions if they already exist (nice if some error or timehout happened on some PDB)
+    if os.path.exists(os.path.join(output_dir, f"{make_filename(model_version, pdb, chain, resnums)}.npz")):
+        print(f'Predictions already exist for {pdb} {chain} {resnums}.', flush=True)
+        return
 
     # filter out resnum duplicates
     # the "compute_zgrams_only_for_requested_regions" procedure implicitly sorts the residues by resnum, so keep them always sorted to make sure these resnums match the order of the predictions
@@ -60,7 +68,7 @@ def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, mode
 
     requested_regions = {'region': region_ids}
     try:
-        ensemble_predictions_dict = predict_from_pdbfile(os.path.join(pdbdir, f'{pdb}.pdb'), models, hparams, 256, regions=requested_regions) # this function is actually very general, it can be used to selectively get HCNN predictions for specific residues
+        ensemble_predictions_dict = predict_from_pdbfile(os.path.join(pdbdir, f'{pdb}.pdb'), models, hparams, 256, regions=requested_regions)
     except Exception as e:
         print(f'Error making predictions for {pdb} {chain} {resnums}: {e}')
         return
@@ -82,7 +90,7 @@ def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, mode
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model_version', type=str, required=True, choices=['HCNN_0p00', 'HCNN_0p50'],
+    parser.add_argument('-m', '--model_version', type=str, required=True, #, choices=['HCNN_0p00', 'HCNN_0p50', 'HCNN_0p00_noReplace', 'HCNN_0p50_noReplace'],
                         help='Name of HCNN model you want to use. E.g. "HCNN_0p50" is HCNN trained with 0.50 Angstrom noise.')
     
     parser.add_argument('--csv_file', type=str, required=True)
@@ -156,15 +164,15 @@ if __name__ == '__main__':
     os.makedirs(args.folder_with_pdbs, exist_ok=True) # make folder if does not exist, so it doesn't have to be made beforehand if it's empty
     pdbs_in_folder = [file[:-4] for file in os.listdir(args.folder_with_pdbs)]
     print(pdbs_in_folder)
-    pdbs_to_download = set(pdbs) - set(pdbs_in_folder)
-    if len(pdbs_to_download) > 0:
-        print(f'Downloading the following PDBs: {pdbs_to_download}')
-        for pdb in pdbs_to_download:
-            try:
-                urllib.request.urlretrieve(f'http://files.rcsb.org/download/{pdb}.pdb', os.path.join(args.folder_with_pdbs, f'{pdb}.pdb'))
-            except Exception as e:
-                print(f'Error downloading {pdb}: {e}')
-                continue
+    # pdbs_to_download = set(pdbs) - set(pdbs_in_folder)
+    # if len(pdbs_to_download) > 0:
+    #     print(f'Downloading the following PDBs: {pdbs_to_download}')
+    #     for pdb in pdbs_to_download:
+    #         try:
+    #             urllib.request.urlretrieve(f'http://files.rcsb.org/download/{pdb}.pdb', os.path.join(args.folder_with_pdbs, f'{pdb}.pdb'))
+    #         except Exception as e:
+    #             print(f'Error downloading {pdb}: {e}')
+    #             continue
     
     # get chains and resnums for each PDB (single call per individual chain)
     pdb_to_chain_to_resnums = {}

@@ -34,7 +34,7 @@ def check_input_arguments(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model_version', type=str, required=True, choices=['HCNN_0p00', 'HCNN_0p50'],
+    parser.add_argument('-m', '--model_version', type=str, required=True, # choices=['HCNN_0p00', 'HCNN_0p50'],
                         help='Name of HCNN model you want to use. E.g. "HCNN_0p50" is HCNN trained with 0.50 Angstrom noise.')
     
     parser.add_argument('-hf', '--hdf5_file', type=str, default=None,

@@ -21,7 +21,7 @@ if __name__ == '__main__':
     this_file_dir = os.path.dirname(os.path.abspath(__file__))
     min_num_of_mutants_for_groups = 10
     system = 'SKEMPI'
-    system_name_in_csv_file = 'skempi_v2_cleaned'
+    system_name_in_csv_file = 'skempi_v2_cleaned_NO_1KBH'
     mutation_column = 'mutant'
     pdb_column = 'PDB_filename'
 

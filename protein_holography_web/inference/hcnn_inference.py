@@ -13,7 +13,8 @@ from typing import *
 from protein_holography_web.cg_coefficients import get_w3j_coefficients
 from protein_holography_web.models import SO3_ConvNet, CGNet
 
-from protein_holography_web.protein_processing.pipeline import get_zernikegrams_from_pdbfile
+# from protein_holography_web.protein_processing.pipeline import get_zernikegrams_from_pdbfile
+from zernikegrams import get_zernikegrams_from_pdbfile
 from protein_holography_web.utils.data import ZernikegramsDataset
 from protein_holography_web.utils.protein_naming import ol_to_ind_size, ind_to_ol_size
 
@@ -136,17 +137,22 @@ def predict_from_pdbfile(pdb_file: str,
     else:
         get_residues = None
 
+    channels = get_channels(hparams['channels'])
+
     get_structural_info_kwargs = {'padded_length': None,
-                                  'SASA': True,
-                                  'charge': True,
+                                  'parser': hparams['parser'],
+                                  'SASA': 'SASA' in channels,
+                                  'charge': 'charge' in channels,
                                   'DSSP': False,
                                   'angles': False,
                                   'fix': True,
-                                  'hydrogens': True,
+                                  'hydrogens': 'H' in channels,
+                                  'extra_molecules': hparams['extra_molecules'],
                                   'multi_struct': 'warn'}
 
     get_neighborhoods_kwargs = {'r_max': hparams['rcut'],
                                 'remove_central_residue': hparams['remove_central_residue'],
+                                'remove_central_sidechain': hparams['remove_central_sidechain'],
                                 'backbone_only': set(hparams['channels']) == set(['CA', 'C', 'O', 'N']),
                                 'get_residues': get_residues}
 

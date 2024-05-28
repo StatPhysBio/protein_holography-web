@@ -11,7 +11,7 @@ this_file_dir = os.path.dirname(os.path.abspath(__file__))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_version', type=str, required=True, choices=['HCNN_0p00', 'HCNN_0p50'])
+    parser.add_argument('--model_version', type=str, required=True) #, choices=['HCNN_0p00', 'HCNN_0p50', 'HCNN_0p00_noReplace', 'HCNN_0p50_noReplace'])
     parser.add_argument('--use_mt_structure', type=int, required=True, choices=[0, 1])
     args = parser.parse_args()
 

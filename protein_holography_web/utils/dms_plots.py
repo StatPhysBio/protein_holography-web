@@ -1,4 +1,6 @@
 
+
+import os
 import numpy as np
 
 # import Bio.PDB as pdb
@@ -396,3 +398,218 @@ def dms_roc_plot(df, dms_column, pred_column, dms_pos_value=None, dms_label=None
     plt.show()
 
     return auc_wt_struct
+
+
+
+def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
+    '''
+    Function to offset the "center" of a colormap. Useful for
+    data with a negative min and positive max and you want the
+    middle of the colormap's dynamic range to be at zero.
+
+    Input
+    -----
+      cmap : The matplotlib colormap to be altered
+      start : Offset from lowest point in the colormap's range.
+          Defaults to 0.0 (no lower offset). Should be between
+          0.0 and `midpoint`.
+      midpoint : The new center of the colormap. Defaults to 
+          0.5 (no shift). Should be between 0.0 and 1.0. In
+          general, this should be  1 - vmax / (vmax + abs(vmin))
+          For example if your data range from -15.0 to +5.0 and
+          you want the center of the colormap at 0.0, `midpoint`
+          should be set to  1 - 5/(5 + 15)) or 0.75
+      stop : Offset from highest point in the colormap's range.
+          Defaults to 1.0 (no upper offset). Should be between
+          `midpoint` and 1.0.
+    '''
+    cdict = {
+        'red': [],
+        'green': [],
+        'blue': [],
+        'alpha': []
+    }
+
+    # regular index to compute the colors
+    reg_index = np.linspace(start, stop, 257)
+
+    # shifted index to match the data
+    shift_index = np.hstack([
+        np.linspace(0.0, midpoint, 128, endpoint=False), 
+        np.linspace(midpoint, 1.0, 129, endpoint=True)
+    ])
+
+    for ri, si in zip(reg_index, shift_index):
+        r, g, b, a = cmap(ri)
+
+        cdict['red'].append((si, r, r))
+        cdict['green'].append((si, g, g))
+        cdict['blue'].append((si, b, b))
+        cdict['alpha'].append((si, a, a))
+
+    newcmap = mpl.colors.LinearSegmentedColormap(name, cdict)
+
+    return newcmap
+
+
+def saturation_mutagenesis_heatmap(input_csv_file: str,
+                                   mutant_score_column: str,
+                                   mutant_column: str = 'mutant',
+                                   aa_order: str = 'AILMFVPGWRHKDENQSTYC',
+                                   show_mutants_in: str = 'columns',
+                                   model_type: str = None):
+
+    '''
+    The code will output the heatmap in a png file with the name "heatmap_{input_csv_file.strip('.csv')}.png".
+    Make the heatmap with mutations in the columns, then transpose it if it is requested differently.
+
+    Parameters
+    ----------
+    input_csv_file : str
+        Name of the csv file containing the data.
+    mutant_score_column : str
+        Name of the column in the input csv file that contains the predicted mutant scores.
+    mutant_column : str
+        Name of the column in the input csv file that contains the mutant names.
+    aa_order : str
+        Left-to-Right or Top-to-Bottom of the mutant amino-acids to show in the heatmap.
+    show_mutants_in : str
+        Whether to show the mutants in rows or columns.
+    model_type : str
+        Only used to choose the name on the prediction colorbar.
+    '''
+
+    aa_to_idx_in_order = {aa: i for i, aa in enumerate(aa_order)}
+
+    df = pd.read_csv(input_csv_file)
+
+    mutants = df[mutant_column].values
+
+    # get native peptide, with "holes" if they occur
+    # accomodate for resnums being arbitrary, not starting necessarily at 1
+    pep_aa_and_resnum_strings = list(set([mut[:-1] for mut in mutants]))
+    pep_aa, pep_resnum = [], []
+    for string in pep_aa_and_resnum_strings:
+        pep_aa.append(string[0])
+        pep_resnum.append(int(string[1:]))
+    pep_aa = np.array(pep_aa)
+    pep_resnum = np.array(pep_resnum)
+    start_resnum = np.min(pep_resnum)
+    pep_resnum = pep_resnum - start_resnum
+    native_peptide = np.array(['-'] * (np.max(pep_resnum) + 1))
+    for aa, resnum in zip(pep_aa, pep_resnum):
+        native_peptide[resnum] = aa
+    # the native peptide is not even used...
+    # "start_resnum" is used though and it's important
+
+    ncols = 20
+    nrows = native_peptide.shape[0]
+    heatmap = np.full((nrows, ncols), np.nan)
+    patches_mutants_in_columns, patches_mutants_in_rows = [], []
+    for i, df_row in df.iterrows():
+        aa_wt = df_row[mutant_column][0]
+        resnum = int(df_row[mutant_column][1:-1])
+        aa_mt = df_row[mutant_column][-1]
+
+        col = aa_to_idx_in_order[aa_mt] # mutant
+        row = resnum - start_resnum # position
+
+        heatmap[row, col] = df_row[mutant_score_column]
+
+        if aa_wt == aa_mt:
+
+            patches_mutants_in_columns.append(mpl.patches.Rectangle(
+                    (-0.5 + col, -0.5 + row),
+                    1.0,
+                    1.0,
+                    edgecolor='black',
+                    fill=False,
+                    lw=2
+                ))
+            
+            patches_mutants_in_rows.append(mpl.patches.Rectangle(
+                    (-0.5 + row, -0.5 + col),
+                    1.0,
+                    1.0,
+                    edgecolor='black',
+                    fill=False,
+                    lw=2
+                ))
+    
+
+    if show_mutants_in == 'columns':
+
+        colsize = 0.25 * ncols
+        rowsize = 0.50 * nrows
+        plt.figure(figsize=(colsize, rowsize))
+        plt.imshow(heatmap, cmap='Blues')
+
+        plt.xticks(np.arange(ncols), aa_order)
+        plt.yticks(np.arange(nrows), np.arange(1, nrows + 1))
+
+        plt.xlabel('Amino acid', fontsize=12)
+        plt.ylabel('Position within peptide', fontsize=12)
+
+        ax = plt.gca()
+        ax.set_aspect(2) # change aspect ratio
+        ax.tick_params(top=True, labeltop=True, bottom=False, labelbottom=False) # move xticks to the top
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+
+        ax.xaxis.set_label_coords(0.5, 1.19)
+        ax.yaxis.set_label_coords(-0.1, 0.5)
+
+        for patch in patches_mutants_in_columns:
+            ax.add_patch(patch)
+    
+    else:
+        
+        temp = nrows
+        nrows = ncols
+        ncols = temp
+        heatmap = heatmap.T
+
+        colsize = 0.50 * ncols
+        rowsize = 0.25 * nrows
+        plt.figure(figsize=(colsize, rowsize))
+        plt.imshow(heatmap, cmap='Blues')
+
+        plt.yticks(np.arange(nrows), aa_order)
+        plt.xticks(np.arange(ncols), np.arange(1, ncols + 1))
+
+        ax = plt.gca()
+        ax.set_aspect(0.5) # change aspect ratio
+        # ax.tick_params(top=True, labeltop=True, bottom=False, labelbottom=False) # move xticks to the top
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+
+        for patch in patches_mutants_in_rows:
+            ax.add_patch(patch)
+    
+    LABEL_TABLE = {
+        'hcnn': r'HCNN prediction, $\Delta logP$',
+        'proteinmpnn': r'ProteinMPNN prediction, $\Delta logP$',
+        None: r'Prediction'
+    }
+
+    cbar = plt.colorbar()
+    cbar.ax.set_ylabel(LABEL_TABLE[model_type], rotation=270, fontsize=12)
+    cbar.ax.yaxis.set_label_coords(4.2, 0.5)
+    plt.tight_layout()
+
+    dir = '/'.join(input_csv_file.split('/')[:-1])
+    file = input_csv_file.split('/')[-1]
+    plt.savefig(os.path.join(dir, 'heatmap_' + file.replace('.csv', '.png')), dpi=300)
+    plt.savefig(os.path.join(dir, 'heatmap_' + file.replace('.csv', '.pdf')), dpi=300)
+    plt.close()
+
+        
+
+
+
+
+
+
+
+
+
