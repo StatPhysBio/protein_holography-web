@@ -1,4 +1,17 @@
 import setuptools
+from setuptools.command.install import install
+import os
+import subprocess
+
+
+class CustomInstall(install):
+    def run(self):
+        install.run(self)
+
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+
+
+
 
 setuptools.setup(
     name='protein_holography_web',
@@ -12,4 +25,6 @@ setuptools.setup(
     python_requires='>=3.9',
     install_requires='',
     packages=setuptools.find_packages(),
+    include_package_data=True,
+    cmdclass={"install": CustomInstall}
 )

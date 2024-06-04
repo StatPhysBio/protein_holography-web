@@ -5,18 +5,12 @@ Summary: Learning protein neighborhoods by incorporating rotational symmetry - w
 Home-page: https://github.com/StatPhysBio/protein_holography-web
 Author: Gian Marco Visani
 Author-email: gvisan01@.cs.washington.edu
+License: UNKNOWN
+Platform: UNKNOWN
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 
 # protein_holography-web
-
-TODO:
-1. Add `requirements.txt` and general tips on installation procedure
-2. Profile and speed up inference. Currently takes 20/30 seconds per protein, which is a little too long. --> structural info takes the longest
-3. Add quick running of T4-Lysozymes and SKEMPI (at least a subset) ddG prediction to check zero-shot performance
-4. T4-Lysozymes is done --> good performance of un-noised model
-5. SKEMPI is done --> good performance of un-noised model
-6. Code up faster inference that leverages multiprocessing --> first process the pdbs in parallel on multiple cores, then form a single hdf5 file with all the zernikegrams, then predict with hcnn on single core (gpu if available)
 
 
 Notes:
@@ -24,6 +18,6 @@ Notes:
 2. For some reason, getting different accuracies on the multi_pdb test? After every run. I do not understand in the slightest. No way the prediction is stochastic. Maybe strucvtural info is stochastic in some way?
 
 
-Profiling:
-1. Getting structural info takes 80% of the processing time, and (80% * 86%) of the prediction time --> TODO profile get_structural_info
+
+
 

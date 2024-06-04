@@ -1,0 +1,31 @@
+name: protholo_web
+channels:
+  - defaults
+  - anaconda
+  - conda-forge
+  - salilab # dssp
+  - pytorch
+dependencies:
+  - python=3.9
+  - pip=23.3.2
+  - numpy
+  - pdbfixer
+  - pocl-cuda # or brew install pocl
+  - dssp # or brew install brewsci/bio/dssp
+  - boost=1.73.0 # pinned for dssp
+  - pytorch=1.13.1
+  - pip:
+    - argparse 
+    - tqdm
+    - biopython
+    - foldcomp
+    - h5py
+    - hdf5plugin
+    - pytest
+    - pytest-order
+    - rich
+    - scikit-learn
+    - sqlitedict
+    - stopit
+    - pyyaml
+    - . # install protholo_web
