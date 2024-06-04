@@ -4,5 +4,7 @@
 *.pdb
 *.pkl
 *.gz
+*.log
+*.err
 protein_holography_web/protein_processing/reduce/
 zernikegrams/
