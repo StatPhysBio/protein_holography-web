@@ -1,7 +1,7 @@
 
 
-model_version_list='HCNN_proteinnet_0p00 HCNN_proteinnet_0p50' # 'HCNN_0p00 HCNN_0p50'
-
+# model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50 HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50 HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50 '
+model_version_list='HCNN_biopython_pisces30_0p00 HCNN_biopython_pisces30_0p50 HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
 pdb_dir='./pdbs/'
 
 base_dir='./'

@@ -21,6 +21,11 @@ if __name__ == '__main__':
     predicted_scores = df['log_proba_mt__minus__log_proba_wt'].values
     pdbids = df['pdbid'].values
 
+    mask = np.isfinite(experimental_scores) & np.isfinite(predicted_scores)
+    experimental_scores = experimental_scores[mask]
+    predicted_scores = predicted_scores[mask]
+    pdbids = pdbids[mask]
+
     # split by pdbid
     pdbid_to_experimental_scores = {}
     pdbid_to_predicted_scores = {}
@@ -34,17 +39,21 @@ if __name__ == '__main__':
     # calculate correlations
     correlations = {}
     for pdbid in pdbid_to_experimental_scores:
-        experimental_scores = np.array(pdbid_to_experimental_scores[pdbid])
-        predicted_scores = np.array(pdbid_to_predicted_scores[pdbid])
+        if len(pdbid_to_experimental_scores[pdbid]) < 2:
+            continue
+        curr_experimental_scores = np.array(pdbid_to_experimental_scores[pdbid])
+        curr_predicted_scores = np.array(pdbid_to_predicted_scores[pdbid])
         correlations[pdbid] = {
-            'pearson': (pearsonr(experimental_scores, predicted_scores)[0], pearsonr(experimental_scores, predicted_scores)[1]),
-            'spearman': (spearmanr(experimental_scores, predicted_scores)[0], spearmanr(experimental_scores, predicted_scores)[1])
+            'pearson': (pearsonr(curr_experimental_scores, curr_predicted_scores)[0], pearsonr(curr_experimental_scores, curr_predicted_scores)[1]),
+            'spearman': (spearmanr(curr_experimental_scores, curr_predicted_scores)[0], spearmanr(curr_experimental_scores, curr_predicted_scores)[1]),
+            'count': len(curr_experimental_scores)
         }
     
     # add overall correlations
     correlations['overall'] = {
         'pearson': (pearsonr(experimental_scores, predicted_scores)[0], pearsonr(experimental_scores, predicted_scores)[1]),
-        'spearman': (spearmanr(experimental_scores, predicted_scores)[0], spearmanr(experimental_scores, predicted_scores)[1])
+        'spearman': (spearmanr(experimental_scores, predicted_scores)[0], spearmanr(experimental_scores, predicted_scores)[1]),
+        'count': len(experimental_scores)
     }
     
     # save correlations

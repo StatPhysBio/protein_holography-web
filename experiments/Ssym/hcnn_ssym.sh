@@ -1,11 +1,14 @@
 
 
-model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50 HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50 HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50 HCNN_biopython_pisces30_0p00 HCNN_biopython_pisces30_0p50 HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
+# model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50 HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50 HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50 HCNN_biopython_pisces30_0p00 HCNN_biopython_pisces30_0p50' # HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
+model_version_list='HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
 use_mt_structure='0'
 
 
 for model_version in $model_version_list
     do
+
+    echo $model_version
 
     python -u ../../zero_shot_mutation_effect_prediction_with_hcnn.py \
                         --model_version $model_version \
