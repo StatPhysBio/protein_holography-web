@@ -1,7 +1,5 @@
 *.npy
 *.npz
-*.csv
-*.pdb
 *.pkl
 *.gz
 *.log
