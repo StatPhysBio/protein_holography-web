@@ -104,9 +104,10 @@ if __name__ == '__main__':
     # add overall correlation
     if len(filtered_experimental_scores) >= 2:
         correlations['overall'] = {
-            'pearson - filtered rosetta [-1;7]': (pearsonr(filtered_experimental_scores, filtered_predicted_scores)[0], pearsonr(filtered_experimental_scores, filtered_predicted_scores)[1]),
-            'spearman - filtered rosetta [-1;7]': (spearmanr(filtered_experimental_scores, filtered_predicted_scores)[0], spearmanr(filtered_experimental_scores, filtered_predicted_scores)[1]),
-            'count - filtered rosetta [-1;7]': len(filtered_experimental_scores)
+            **correlations['overall'],
+            **{'pearson - filtered rosetta [-1;7]': (pearsonr(filtered_experimental_scores, filtered_predicted_scores)[0], pearsonr(filtered_experimental_scores, filtered_predicted_scores)[1]),
+               'spearman - filtered rosetta [-1;7]': (spearmanr(filtered_experimental_scores, filtered_predicted_scores)[0], spearmanr(filtered_experimental_scores, filtered_predicted_scores)[1]),
+               'count - filtered rosetta [-1;7]': len(filtered_experimental_scores)}
         }
 
     # save correlations

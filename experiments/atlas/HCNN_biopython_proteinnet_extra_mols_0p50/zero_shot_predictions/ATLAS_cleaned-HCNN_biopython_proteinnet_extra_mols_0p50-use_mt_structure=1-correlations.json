@@ -1,0 +1,48 @@
+{
+    "Overall": {
+        "all_types_of_mutations": {
+            "Pr": -0.04163207701672983,
+            "Pr_pval": 0.8656214226063558,
+            "Sr": -0.02460456942003515,
+            "Sr_pval": 0.920358346835277,
+            "num": 19.0
+        },
+        "single_point_mutations": {
+            "Pr": -0.28056285914128487,
+            "Pr_pval": 0.377073357863667,
+            "Sr": -0.2771929824561404,
+            "Sr_pval": 0.38307216973596947,
+            "num": 12.0
+        },
+        "multi_point_mutations": {
+            "Pr": 0.54783198167491,
+            "Pr_pval": 0.20300188263332616,
+            "Sr": 0.12727272727272726,
+            "Sr_pval": 0.7856807944470137,
+            "num": 7.0
+        }
+    },
+    "Per-Structure": {
+        "all_types_of_mutations": {
+            "Pr": NaN,
+            "Pr_pval": NaN,
+            "Sr": NaN,
+            "Sr_pval": NaN,
+            "num": 0.0
+        },
+        "single_point_mutations": {
+            "Pr": NaN,
+            "Pr_pval": NaN,
+            "Sr": NaN,
+            "Sr_pval": NaN,
+            "num": 0.0
+        },
+        "multi_point_mutations": {
+            "Pr": NaN,
+            "Pr_pval": NaN,
+            "Sr": NaN,
+            "Sr_pval": NaN,
+            "num": 0.0
+        }
+    }
+}

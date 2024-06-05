@@ -102,11 +102,13 @@ if __name__ == '__main__':
         }
     
     # add overall correlation
-    correlations['overall'] = {
-        'pearson - filtered rosetta [-1;7]': (pearsonr(filtered_experimental_scores, filtered_predicted_scores)[0], pearsonr(filtered_experimental_scores, filtered_predicted_scores)[1]),
-        'spearman - filtered rosetta [-1;7]': (spearmanr(filtered_experimental_scores, filtered_predicted_scores)[0], spearmanr(filtered_experimental_scores, filtered_predicted_scores)[1]),
-        'count - filtered rosetta [-1;7]': len(filtered_experimental_scores)
-    }  
+    if len(filtered_experimental_scores) >= 2:
+        correlations['overall'] = {
+            **correlations['overall'],
+            **{'pearson - filtered rosetta [-1;7]': (pearsonr(filtered_experimental_scores, filtered_predicted_scores)[0], pearsonr(filtered_experimental_scores, filtered_predicted_scores)[1]),
+               'spearman - filtered rosetta [-1;7]': (spearmanr(filtered_experimental_scores, filtered_predicted_scores)[0], spearmanr(filtered_experimental_scores, filtered_predicted_scores)[1]),
+               'count - filtered rosetta [-1;7]': len(filtered_experimental_scores)}
+        }  
     
     # save correlations
     with open(f'{args.model_version}/zero_shot_predictions/{args.system_name}_ddg_experimental-{args.model_version}-use_mt_structure={args.use_mt_structure}_correlations.json', 'w') as f:

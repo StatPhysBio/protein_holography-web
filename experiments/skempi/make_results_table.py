@@ -16,7 +16,16 @@ MODELS = ['HCNN_biopython_proteinnet_0p00',
           'HCNN_pyrosetta_proteinnet_extra_mols_0p50']
 
 
-system_name = 'hsiue_et_al_H2_sat_mut'
+system_name = 'skempi_v2_cleaned_NO_1KBH'
+
+for curr_comp_in_json, curr_comp in zip(['Per-Structure', 'Overall'],
+                                        ['per structure', 'overall']):
+    
+    for mut_types, is_single, is_multi in zip(['all_types_of_mutations', 'single_point_mutations', 'multi_point_mutations'],
+                                              [True, True, False],
+                                              [True, False, True]):
+
+    
 
 correlations_values_in_table = {}
 
@@ -28,13 +37,13 @@ for hcnn_model in MODELS:
     with open(f'{hcnn_model}/zero_shot_predictions/{system_name}-{hcnn_model}-use_mt_structure=0-correlations.json', 'r') as f:
         correlations = json.load(f)
     
-    pr = correlations['log_proba_mt__minus__log_proba_wt vs. IFN_gamma (pg/ml)']['Pr']
-    pr_pval = correlations['log_proba_mt__minus__log_proba_wt vs. IFN_gamma (pg/ml)']['Pr_pval']
+    pr = correlations['overall']['pearson'][0]
+    pr_pval = correlations['overall']['pearson'][1]
 
-    sr = correlations['log_proba_mt__minus__log_proba_wt vs. IFN_gamma (pg/ml)']['Sr']
-    sr_pval = correlations['log_proba_mt__minus__log_proba_wt vs. IFN_gamma (pg/ml)']['Sr_pval']
+    sr = correlations['overall']['spearman'][0]
+    sr_pval = correlations['overall']['spearman'][1]
 
-    num_measurements = correlations['log_proba_mt__minus__log_proba_wt vs. IFN_gamma (pg/ml)']['num']
+    num_measurements = correlations['overall']['count']
     num_measurements_trace.append(num_measurements)
 
     correlations_values_in_table[hcnn_model + ' - Pearsonr'] = pr
@@ -45,7 +54,7 @@ for hcnn_model in MODELS:
 if len(set(num_measurements_trace)) > 1:
     print('WARNINGL Number of measurements for each model is not the same')
 
-metadata_values = ['Hsiue et al.', 'IFN_gamma (pg/ml)', num_measurements_trace[-1], 1, True, False, 'per structure']
+metadata_values = ['Protein G', 'ddG', num_measurements_trace[-1], 1, True, False, 'per structure']
 
 metatadata_in_table = dict(zip(METADATA_COLUMNS, metadata_values))
 
