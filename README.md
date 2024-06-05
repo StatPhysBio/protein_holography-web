@@ -32,3 +32,10 @@ Notes:
 
 
 
+## TODO
+
+[] Produce table with all correlation predictions
+[] Add usage details in README, showing examples
+[X] Better documentation of main scripts (especially argparse of mutation_effect_prediction)
+[] Make colab (include it here, so people can use it as a jupyter notebook)
+

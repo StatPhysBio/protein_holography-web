@@ -18,6 +18,7 @@ for system in $systems
                             --csv_file $base_dir$system'.csv' \
                             --folder_with_pdbs $pdb_dir \
                             --output_dir $base_dir \
+                            --wt_pdb_column wt_pdb \
                             --mutant_column mutant \
                             --mutant_chain_column mutant_chain \
                             --use_mt_structure 0

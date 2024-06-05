@@ -38,7 +38,7 @@ if __name__ == '__main__':
         df_full = pd.read_csv(os.path.join(this_file_dir, model_version, 'zero_shot_predictions', f'{system_name_in_csv_file}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
 
         # filter out nans and infs
-        df_full = df_full.loc[np.isfinite(df_full['log10(Kd_wt/Kd_mt)'].values)].reset_index(drop=True)
+        df_full = df_full.loc[np.isfinite(df_full['ddg'].values)].reset_index(drop=True)
         df_full = df_full.loc[np.isfinite(df_full['log_proba_mt__minus__log_proba_wt'].values)].reset_index(drop=True)
 
         if num_mut_mode == 'single_point_mutations':
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         df_full = df_full.merge(df_dsmbind, on=['to_merge'], how='inner')
 
         prediction_column = 'log_proba_mt__minus__log_proba_wt'
-        target_column = 'ddg' # note, this ddG has opposite sign as the ddG of skempi
+        target_column = 'ddg'
 
 
         # exlude nans and infs, keep only one wildtype measurement

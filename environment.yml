@@ -17,6 +17,7 @@ dependencies:
   - pip:
     - argparse 
     - tqdm
+    - openpyxl
     - biopython
     - foldcomp
     - h5py

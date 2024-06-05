@@ -16,6 +16,7 @@ for model_version in $model_version_list
     #                     --csv_file $base_dir'hsiue_et_al_H2_sat_mut.csv' \
     #                     --folder_with_pdbs $pdb_dir \
     #                     --output_dir $base_dir \
+    #                     --wt_pdb_column wt_pdb \
     #                     --mutant_column mutant \
     #                     --mutant_chain_column mutant_chain \
     #                     --use_mt_structure 0

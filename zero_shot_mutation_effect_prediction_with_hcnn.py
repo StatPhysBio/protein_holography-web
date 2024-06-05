@@ -32,6 +32,10 @@ import argparse
 from protein_holography_web.utils.argparse import *
 
 
+def check_arguments(args):
+    if args.use_mt_structure: assert args.mt_pdb_column is not None, 'Must specify --mt_pdb_column if use_mt_structure=1.'
+
+
 def make_filename(model_version, pdb, chain, resnums):
     return f"{model_version}__{pdb}__{chain}__{','.join([str(x) for x in resnums])}"
 
@@ -80,44 +84,74 @@ def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, mode
     else:
         logps = np.log(np.mean(ensemble_predictions_dict['probabilities'], axis=0))
 
+    resnums_in_res_ids = ensemble_predictions_dict['res_ids'][:, 3].astype(int)
+    if not np.all(resnums_in_res_ids == np.array(resnums)):
+        print(f"WARNING: Resnums in res_ids do not match the requested resnums. Some resnums were not computed.")
+        if pes.shape[0] != resnums_in_res_ids.shape[0]:
+            print('Shape mismatch in pes. Super weird. Skipping.')
+            return
+
     os.makedirs(output_dir, exist_ok=True)
     np.savez(os.path.join(output_dir, f"{make_filename(model_version, pdb, chain, resnums)}.npz"),
                 pes=pes,
                 logps=logps,
-                resnums=np.array(resnums),
+                resnums=resnums_in_res_ids, # using the correct resnums, which match the predictions for sure
                 chain=chain)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model_version', type=str, required=True, #, choices=['HCNN_0p00', 'HCNN_0p50', 'HCNN_0p00_noReplace', 'HCNN_0p50_noReplace'],
-                        help='Name of HCNN model you want to use. E.g. "HCNN_0p50" is HCNN trained with 0.50 Angstrom noise.')
+    parser.add_argument('-m', '--model_version', type=str, required=True,
+                        help='Name of HCNN model you want to use.')
     
-    parser.add_argument('--csv_file', type=str, required=True)
-    parser.add_argument('--folder_with_pdbs', type=str, required=True)
-    parser.add_argument('--output_dir', type=str, required=True)
+    parser.add_argument('--csv_file', type=str, required=True,
+                        help='CSV file with the mutations to score. Must have columns for the wildtype PDB file, the mutation, and the chain the mutation occurs on. If use_mt_structure=1, must also have a column for the mutant PDB file.')
 
-    parser.add_argument('--dont_run_inference', type=int, default=0)
+    parser.add_argument('--folder_with_pdbs', type=str, required=True,
+                        help='Folder with the PDB files. Must contain the PDB files specified in the CSV file.')
+    
+    parser.add_argument('--output_dir', type=str, required=True,
+                        help='Output directory for the results. The directory will contain subdirectory "inference" with .npz files containing batch prediction information (can be discarded), \
+                              and subdirectory "zero_shot_predictions" with the CSV file containing the results.')
+
+    parser.add_argument('--wt_pdb_column', type=str, required=True,
+                        help='Column name with the wildtype PDB file')
+    
+    parser.add_argument('--mt_pdb_column', type=optional_str, default=None,
+                        help='Column name with the mutant PDB file. Must specify it if use_mt_structure=1.')
+    
+    parser.add_argument('--mutant_column', type=str, required=True,
+                        help='Column name with the mutation')
+    
+    parser.add_argument('--mutant_chain_column', type=str, required=True,
+                        help='Column name with the chain the mutation occurs on')
+    
+    parser.add_argument('--mutant_split_symbol', type=str, default='|',
+                        help='Symbol used to split multiple mutations.')
 
     parser.add_argument('--use_mt_structure', type=int, default=0,
                         help='0 for false, 1 for true. If toggled, compute logits for mutations on the corresponding mutated structure.')
 
     parser.add_argument('-el', '--ensemble_at_logits_level', default=0, type=int, choices=[0, 1],
                         help="1 for True, 0 for False. When computing probabilities and log-probabilities, ensembles the logits before computing the softmax, as opposed to ansembling the individual models' probabilities. There should not be a big difference, unless the ensembled models are trained very differently.")
+    
+    parser.add_argument('--dont_run_inference', type=int, default=0, choices=[0, 1],
+                        help='1 for True, 0 for False. If True, will not run inference, only parse the .npz files. Mainly intended for debugging purposes.')
 
-    parser.add_argument('--wt_pdb_column', type=str, default='wt_pdb')
-    parser.add_argument('--mt_pdb_column', type=str, default='mt_pdb')
+    # These are only used for making a scatter plot. Useful for a quick visualization. Donot need to use them
+    parser.add_argument('--dms_column', type=optional_str, default=None,
+                        help='Column with the values you want to correlater with (e.g. ddg)')
+    
+    parser.add_argument('--dms_label', type=optional_str, default=None,
+                        help='Optional label to substitute dms_column in the scatter plot')
 
-    parser.add_argument('--dms_column', type=optional_str, default=None) # ddG
-    parser.add_argument('--dms_label', type=optional_str, default=None) #r'stability effect, $\Delta\Delta G$')
-    parser.add_argument('--mutant_column', type=str, default='mutant', help='Column name with the mutation')
-    parser.add_argument('--mutant_chain_column', type=optional_str, default=None, help='Column name with the chain the mutation occurs on')
-    parser.add_argument('--mutant_split_symbol', type=str, default='|', help='Symbol used to split multiple mutations.')
 
     parser.add_argument('--num_splits', type=int, default=1, help='Number of splits to make in the CSV file. Useful for parallelizing the script.')
     parser.add_argument('--split_idx', type=int, default=0, help='Split index')
 
     args = parser.parse_args()
+
+    check_arguments(args)
 
 
     '''
@@ -274,6 +308,14 @@ if __name__ == '__main__':
             else:
                 mt_pdb = wt_pdb
                 mt_data = wt_data
+            
+            if wt_data['pes'].shape[0] != wt_data['resnums'].shape[0]:
+                print(f"WARNING: Shape mismatch in wt_data. pes is {wt_data['pes'].shape[0]}, resnums is {wt_data['resnums'].shape[0]}. Skipping {wt_pdb} {chain} {resnum}.")
+                temp_pe_wt.append(np.nan)
+                temp_pe_mt.append(np.nan)
+                temp_log_proba_wt.append(np.nan)
+                temp_log_proba_mt.append(np.nan)
+                continue
             
             wt_pe = wt_data['pes'][np.where(wt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_wt]]
             mt_pe = mt_data['pes'][np.where(mt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_mt]]

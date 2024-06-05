@@ -58,8 +58,7 @@ if __name__ == '__main__':
         df_full = df_full.drop_duplicates(subset=['to_merge']) # drops our duplicates, DSSMBind has no duplicates already
         df_full = df_full.merge(df_dsmbind, on=['to_merge'], how='inner')
 
-        df_full['neg__log_proba_mt__minus__log_proba_wt'] = -df_full['log_proba_mt__minus__log_proba_wt']
-        prediction_column = 'neg__log_proba_mt__minus__log_proba_wt'
+        prediction_column = 'log_proba_mt__minus__log_proba_wt'
         target_column = 'ddg'
 
 

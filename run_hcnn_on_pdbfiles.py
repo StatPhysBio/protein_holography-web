@@ -34,8 +34,8 @@ def check_input_arguments(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model_version', type=str, required=True, # choices=['HCNN_0p00', 'HCNN_0p50'],
-                        help='Name of HCNN model you want to use. E.g. "HCNN_0p50" is HCNN trained with 0.50 Angstrom noise.')
+    parser.add_argument('-m', '--model_version', type=str, required=True,
+                        help='Name of HCNN model you want to use.')
     
     parser.add_argument('-hf', '--hdf5_file', type=str, default=None,
                         help='Path to an .hdf5 file containing zernikegrams and res_ids to run inference on. Cannot be specified together with --folder_with_pdbs.')
@@ -53,11 +53,10 @@ if __name__ == '__main__':
                         help="1 for True, 0 for False. When computing probabilities and log-probabilities, ensembles the logits before computing the softmax, as opposed to ansembling the individual models' probabilities. There should not be a big difference, unless the ensembled models are trained very differently.")
     
     parser.add_argument('-bs', '--batch_size', type=int, default=512,
-                        help='Batch size for the model.\n'
-                             'Will not make a difference if running inference on one PDB at a time (i.e. --pdb_processing is set to "one_at_a_time").')
+                        help='Batch size for the model (number of sites). Higher batch sizes are faster, but may not fit in memory. Default is 512.')
 
     parser.add_argument('-v', '--verbose', type=int, default=0, choices=[0, 1],
-                        help='0 for no, 1 for yes.')
+                        help='0 for no, 1 for yes. Currently, "yes" will print out accuracy of the model on the data.')
 
     parser.add_argument('-lb', '--loading_bar', type=int, default=1, choices=[0, 1],
                         help='0 for no, 1 for yes.')
