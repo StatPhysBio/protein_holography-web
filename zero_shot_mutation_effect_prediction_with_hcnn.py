@@ -317,6 +317,16 @@ if __name__ == '__main__':
                 temp_log_proba_mt.append(np.nan)
                 continue
             
+            try:
+                np.where(wt_data['resnums'] == resnum)[0][0]
+            except IndexError:
+                print(f"WARNING: Resnum {resnum} not found in wt_data. Skipping {wt_pdb} {chain} {resnum}.")
+                temp_pe_wt.append(np.nan)
+                temp_pe_mt.append(np.nan)
+                temp_log_proba_wt.append(np.nan)
+                temp_log_proba_mt.append(np.nan)
+                continue
+            
             wt_pe = wt_data['pes'][np.where(wt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_wt]]
             mt_pe = mt_data['pes'][np.where(mt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_mt]]
 
