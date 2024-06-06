@@ -97,20 +97,20 @@ if __name__ == '__main__':
                         sr.append(sr_)
                         sr_pval.append(sr_pval_)
                         num.append(len(targets))
-                return np.mean(pr), combine_pvalues(pr_pval, method='fisher')[1], np.mean(sr), combine_pvalues(sr_pval, method='fisher')[1], np.sum(num)
+                return np.mean(pr), combine_pvalues(pr_pval, method='fisher')[1], np.mean(sr), combine_pvalues(sr_pval, method='fisher')[1], np.sum(num), len(num)
             else:
                 targets, predictions = df[target_column].values, df[prediction_column].values
                 pr, pr_pval = pearsonr(targets, predictions)
                 sr, sr_pval = spearmanr(targets, predictions)
                 num = len(targets)
-                return pr, pr_pval, sr, sr_pval, num
+                return pr, pr_pval, sr, sr_pval, num, len(df.groupby(pdb_column))
 
 
-        pr, pr_pval, sr, sr_pval, num = get_correlations(df_full)
-        correlations_dict['Overall'][num_mut_mode] = {'Pr': float(pr), 'Pr_pval': float(pr_pval), 'Sr': float(sr), 'Sr_pval': float(sr_pval), 'num': float(num)}
+        pr, pr_pval, sr, sr_pval, num , num_struc= get_correlations(df_full)
+        correlations_dict['Overall'][num_mut_mode] = {'Pr': float(pr), 'Pr_pval': float(pr_pval), 'Sr': float(sr), 'Sr_pval': float(sr_pval), 'num': float(num), 'num_struc': float(num_struc)}
 
-        pr, pr_pval, sr, sr_pval, num = get_correlations(df_full, do_group_structures=True)
-        correlations_dict['Per-Structure'][num_mut_mode] = {'Pr': float(pr), 'Pr_pval': float(pr_pval), 'Sr': float(sr), 'Sr_pval': float(sr_pval), 'num': float(num)}
+        pr, pr_pval, sr, sr_pval, num, num_struc = get_correlations(df_full, do_group_structures=True)
+        correlations_dict['Per-Structure'][num_mut_mode] = {'Pr': float(pr), 'Pr_pval': float(pr_pval), 'Sr': float(sr), 'Sr_pval': float(sr_pval), 'num': float(num), 'num_struc': float(num_struc)}
 
     with open(os.path.join(this_file_dir, model_version, 'zero_shot_predictions', f'{system_name_in_csv_file}-{model_version}-use_mt_structure={use_mt_structure}-correlations.json'), 'w') as f:
         json.dump(correlations_dict, f, indent=4)

@@ -12,10 +12,11 @@
 #SBATCH -o hcnn_skempi.log
 
 # model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50'
-# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50'
+# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00'
+model_version_list='HCNN_biopython_proteinnet_extra_mols_0p50'
 # model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50'
 # model_version_list='HCNN_biopython_pisces30_0p00 HCNN_biopython_pisces30_0p50'
-model_version_list='HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
+# model_version_list='HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
 use_mt_structure='0'
 
 base_dir='./'

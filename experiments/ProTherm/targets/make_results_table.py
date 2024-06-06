@@ -1,19 +1,12 @@
 
-import os
+import os, sys
 import json
 import numpy as np
 import pandas as pd
 
 
-METADATA_COLUMNS = ['dataset', 'measurement type', 'num measurements', 'num structures', 'is single-point', 'is multi-point', 'correlation computation']
-
-
-MODELS = ['HCNN_biopython_proteinnet_0p00',
-          'HCNN_biopython_proteinnet_0p50',
-          'HCNN_biopython_proteinnet_extra_mols_0p00',
-          'HCNN_biopython_proteinnet_extra_mols_0p50',
-          'HCNN_pyrosetta_proteinnet_extra_mols_0p00',
-          'HCNN_pyrosetta_proteinnet_extra_mols_0p50']
+sys.path.append('..')
+from get_full_table import METADATA_COLUMNS, MODELS
 
 
 system_name = 'protherm_targets_ddg_experimental'
@@ -33,10 +26,10 @@ for protein_name, pdbid in zip(['Myoglobin', 'Lysozyme', 'Chymotrypsin inhib.', 
         with open(f'{hcnn_model}/zero_shot_predictions/{system_name}-{hcnn_model}-use_mt_structure=0_correlations.json', 'r') as f:
             correlations = json.load(f)
         
-        pr = correlations[pdbid]['pearson'][0]
+        pr = -correlations[pdbid]['pearson'][0] # flip correlation so higher is better
         pr_pval = correlations[pdbid]['pearson'][1]
 
-        sr = correlations[pdbid]['spearman'][0]
+        sr = -correlations[pdbid]['spearman'][0] # flip correlation so higher is better
         sr_pval = correlations[pdbid]['spearman'][1]
 
         num_measurements = correlations[pdbid]['count']
@@ -51,7 +44,7 @@ for protein_name, pdbid in zip(['Myoglobin', 'Lysozyme', 'Chymotrypsin inhib.', 
         print('WARNING: Number of measurements for each model is not the same')
         print(num_measurements_trace)
 
-    metadata_values = [f'ProTherm - {protein_name}', 'ddG', num_measurements_trace[-1], 1, True, False, 'per structure']
+    metadata_values = [f'ProTherm - {protein_name}', False, '-ddG stability', num_measurements_trace[-1], 1, True, False, 'per structure']
 
     metatadata_in_table = dict(zip(METADATA_COLUMNS, metadata_values))
 

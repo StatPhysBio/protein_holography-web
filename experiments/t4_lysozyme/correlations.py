@@ -42,7 +42,8 @@ if __name__ == '__main__':
         predicted_scores = np.array(pdbid_to_predicted_scores[pdbid])
         correlations[pdbid] = {
             'pearson': (pearsonr(experimental_scores, predicted_scores)[0], pearsonr(experimental_scores, predicted_scores)[1]),
-            'spearman': (spearmanr(experimental_scores, predicted_scores)[0], spearmanr(experimental_scores, predicted_scores)[1])
+            'spearman': (spearmanr(experimental_scores, predicted_scores)[0], spearmanr(experimental_scores, predicted_scores)[1]),
+            'count': len(experimental_scores)
         }
     
     # save correlations

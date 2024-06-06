@@ -1,19 +1,11 @@
 
-import os
+import os, sys
 import json
 import numpy as np
 import pandas as pd
 
-
-METADATA_COLUMNS = ['dataset', 'measurement type', 'num measurements', 'num structures', 'is single-point', 'is multi-point', 'correlation computation']
-
-
-MODELS = ['HCNN_biopython_proteinnet_0p00',
-          'HCNN_biopython_proteinnet_0p50',
-          'HCNN_biopython_proteinnet_extra_mols_0p00',
-          'HCNN_biopython_proteinnet_extra_mols_0p50',
-          'HCNN_pyrosetta_proteinnet_extra_mols_0p00',
-          'HCNN_pyrosetta_proteinnet_extra_mols_0p50']
+sys.path.append('..')
+from get_full_table import METADATA_COLUMNS, MODELS
 
 
 system_name = 'hsiue_et_al_H2_sat_mut'
@@ -45,7 +37,7 @@ for hcnn_model in MODELS:
 if len(set(num_measurements_trace)) > 1:
     print('WARNINGL Number of measurements for each model is not the same')
 
-metadata_values = ['Hsiue et al.', 'IFN_gamma (pg/ml)', num_measurements_trace[-1], 1, True, False, 'per structure']
+metadata_values = ['Hsiue et al.', False, 'IFN_gamma (pg/ml)', num_measurements_trace[-1], 1, True, False, 'per structure']
 
 metatadata_in_table = dict(zip(METADATA_COLUMNS, metadata_values))
 
