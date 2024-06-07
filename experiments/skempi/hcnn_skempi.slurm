@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=skempi
-#SBATCH --account=stf
-#SBATCH --partition=gpu-2080ti
-#SBATCH --gres=gpu:1
+#SBATCH --account=spe
+#SBATCH --partition=compute
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=23:00:00
@@ -11,9 +10,8 @@
 #SBATCH -e hcnn_skempi.err
 #SBATCH -o hcnn_skempi.log
 
-# model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50'
-# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00'
-model_version_list='HCNN_biopython_proteinnet_extra_mols_0p50'
+model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50'
+# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50'
 # model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50'
 # model_version_list='HCNN_biopython_pisces30_0p00 HCNN_biopython_pisces30_0p50'
 # model_version_list='HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'

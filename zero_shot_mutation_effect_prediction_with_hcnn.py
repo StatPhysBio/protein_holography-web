@@ -57,10 +57,10 @@ import stopit
 @stopit.threading_timeoutable(60*10) # stop it if it takes more than 10 minutes
 def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, models, hparams, ensemble_at_logits_level):
 
-    ## do not make predictions if they already exist (nice if some error or timehout happened on some PDB)
-    if os.path.exists(os.path.join(output_dir, f"{make_filename(model_version, pdb, chain, resnums)}.npz")):
-        print(f'Predictions already exist for {pdb} {chain} {resnums}.', flush=True)
-        return
+    # ## do not make predictions if they already exist (nice if some error or timehout happened on some PDB)
+    # if os.path.exists(os.path.join(output_dir, f"{make_filename(model_version, pdb, chain, resnums)}.npz")):
+    #     print(f'Predictions already exist for {pdb} {chain} {resnums}.', flush=True)
+    #     return
 
     # filter out resnum duplicates
     # the "compute_zgrams_only_for_requested_regions" procedure implicitly sorts the residues by resnum, so keep them always sorted to make sure these resnums match the order of the predictions
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     
     parser.add_argument('--dont_run_inference', type=int, default=0, choices=[0, 1],
                         help='1 for True, 0 for False. If True, will not run inference, only parse the .npz files. Mainly intended for debugging purposes.')
-
+    
     # These are only used for making a scatter plot. Useful for a quick visualization. Donot need to use them
     parser.add_argument('--dms_column', type=optional_str, default=None,
                         help='Column with the values you want to correlater with (e.g. ddg)')

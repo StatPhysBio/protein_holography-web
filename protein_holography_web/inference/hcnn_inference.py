@@ -117,9 +117,11 @@ def predict_from_pdbfile(pdb_file: str,
                           models: List,
                           hparams: List[Dict],
                           batch_size: int,
+                          chain: Optional[str] = None,
                           regions: Optional[Dict[str, List[Tuple[str, int, str]]]] = None):
-    '''
-    '''
+
+    if chain is not None and regions is not None:
+        raise ValueError("Cannot specify both chain and regions")
 
     data_irreps, ls_indices = get_data_irreps(hparams)
 
@@ -133,6 +135,11 @@ def predict_from_pdbfile(pdb_file: str,
                 region_ids.extend(regions[region_name])
             region_ids = np.unique(np.array(region_ids).astype(all_res_ids_info_we_care_about.dtype), axis=0)
             indices = np.where(np.isin(all_res_ids_info_we_care_about, region_ids).all(axis=1))[0]
+            return res_ids[indices]
+    elif chain is not None:
+        def get_residues(np_protein):
+            res_ids = np.unique(np_protein['res_ids'], axis=0)
+            indices = np.where(res_ids[:, 2] == chain.encode())[0]
             return res_ids[indices]
     else:
         get_residues = None

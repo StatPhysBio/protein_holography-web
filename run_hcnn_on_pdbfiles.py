@@ -31,6 +31,13 @@ def check_input_arguments(args):
     assert args.hdf5_file or args.folder_with_pdbs, 'Either --hdf5_file or --folder_with_pdbs must be specified.'
     assert not (args.hdf5_file and args.folder_with_pdbs), 'Cannot specify both --hdf5_file and --folder_with_pdbs.'
 
+def download_pdbfile(pdbid, folder_with_pdbs, verbose):
+    # downloads from RCSB
+    if verbose:
+        silent_flag = ''
+    else:
+        silent_flag = '-s'
+    os.system(f"curl {silent_flag} https://files.rcsb.org/download/{pdbid}.pdb -o {os.path.join(folder_with_pdbs, pdbid + '.pdb')}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -38,10 +45,17 @@ if __name__ == '__main__':
                         help='Name of HCNN model you want to use.')
     
     parser.add_argument('-hf', '--hdf5_file', type=str, default=None,
-                        help='Path to an .hdf5 file containing zernikegrams and res_ids to run inference on. Cannot be specified together with --folder_with_pdbs.')
+                        help='Path to an .hdf5 file containing zernikegrams and res_ids to run inference on.\n \
+                              Cannot be specified together with --folder_with_pdbs.')
     
     parser.add_argument('-pd', '--folder_with_pdbs', type=str, default=None,
-                        help='Directory containing PDB files to run inference on. Inference is run on all sites in the structure. Cannot be specified together with --hdf5_file.')
+                        help='Directory containing PDB files to run inference on. Inference is run on all sites in the structure.\n \
+                              Cannot be specified together with --hdf5_file.')
+    
+    parser.add_argument('-pn', '--file_with_pdbids_and_chains', type=str, default=None,
+                        help='[Optional] Path to a .txt file containing pdbids and chains to run inference on.\n \
+                              If not specified, and --folder_with_pdbs is specified, inference will be run on all sites in the structure.\n \
+                              If specified, each line should be in the format "pdbid chain"; if chain is not specified for a given line, inference will be run on all chains in that structure.')
     
     parser.add_argument('-o', '--output_filepath', type=str, required=True,
                         help='Must be a ".csv file". Embeddings will be saved separately, in a parallel array, with the same filename but with the extension "-embeddings.npy".')
@@ -50,7 +64,8 @@ if __name__ == '__main__':
                         help='Which data to return. Can be a combination of "logprobas", "probas", "embeddings", and "logits".')
     
     parser.add_argument('-el', '--ensemble_at_logits_level', default=0, type=int, choices=[0, 1],
-                        help="1 for True, 0 for False. When computing probabilities and log-probabilities, ensembles the logits before computing the softmax, as opposed to ansembling the individual models' probabilities. There should not be a big difference, unless the ensembled models are trained very differently.")
+                        help="1 for True, 0 for False. When computing probabilities and log-probabilities, ensembles the logits before computing the softmax, as opposed to ansembling the individual models' probabilities.\n \
+                              There should not be a big difference, unless the ensembled models are trained very differently.")
     
     parser.add_argument('-bs', '--batch_size', type=int, default=512,
                         help='Batch size for the model (number of sites). Higher batch sizes are faster, but may not fit in memory. Default is 512.')
@@ -134,14 +149,43 @@ if __name__ == '__main__':
         if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
 
     elif args.folder_with_pdbs is not None:
-        pdb_files = [os.path.join(args.folder_with_pdbs, pdb) for pdb in os.listdir(args.folder_with_pdbs) if pdb.endswith('.pdb')]
+
+        os.makedirs(args.folder_with_pdbs, exist_ok=True) # make it if it does not exist (i.e. if user wants to download all requested pdb files)
+
+        if args.file_with_pdbids_and_chains is not None:
+            pdb_files, chains = [], []
+            with open(args.file_with_pdbids_and_chains, 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    pdbid_and_chain = line.strip().split()
+                    pdbid = pdbid_and_chain[0]
+                    if len(pdbid_and_chain) == 1:
+                        chain = None
+                    elif len(pdbid_and_chain) == 2:
+                        chain = pdbid_and_chain[1]
+                    else:
+                        raise ValueError('Each line in --file_with_pdbids_and_chains must be in the format "pdbid" or "pdbid chain"')
+                    
+                    pdbfile = os.path.join(args.folder_with_pdbs, pdbid + '.pdb')
+
+                    if not os.path.exists(pdbfile):
+                        download_pdbfile(pdbid, args.folder_with_pdbs, args.verbose)
+                    
+                    pdb_files.append(pdbfile)
+                    chains.append(chain)
+        else:
+            pdb_files = [os.path.join(args.folder_with_pdbs, pdb) for pdb in os.listdir(args.folder_with_pdbs) if pdb.endswith('.pdb')]
+            chains = [None for _ in pdb_files]
+
         if args.verbose: print(f'Running inference on {len(pdb_files)} pdb files found in: {args.folder_with_pdbs}')
 
         if args.loading_bar:
-            pdb_files = tqdm(pdb_files, total=len(pdb_files))
+            pdb_files_and_chains = tqdm(zip(pdb_files, chains), total=len(pdb_files))
+        else:
+            pdb_files_and_chains = zip(pdb_files, chains)
 
-        for pdbfile in pdb_files:
-            inference = predict_from_pdbfile(pdbfile, models, hparams, args.batch_size)
+        for pdbfile, chain in pdb_files_and_chains:
+            inference = predict_from_pdbfile(pdbfile, models, hparams, args.batch_size, chain=chain)
 
             if len(inference['best_indices'].shape) == 2:
                 if args.verbose: print('Accuracy of first model in ensemble: %.3f' % accuracy_score(inference['targets'], inference['best_indices'][0, :]))
