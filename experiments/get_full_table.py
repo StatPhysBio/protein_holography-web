@@ -35,8 +35,6 @@ if __name__ == '__main__':
     os.system('cd t4_lysozyme && python make_results_table.py && cd ..')
     os.system('cd skempi && python make_results_table.py && cd ..')
     os.system('cd atlas && python make_results_table.py && cd ..')
-    os.system('cd hsiue_et_al && python make_results_table.py && cd ..')
-    os.system('cd luksza_et_al && python make_results_table.py && cd ..')
 
     # combine the tables
     table_files = ['Protein_G/protein_g_ddg_experimental-results_table.csv',
@@ -46,15 +44,7 @@ if __name__ == '__main__':
                     'Ssym/Ssym_inv/ssym_inv_ddg_experimental-results_table.csv',
                     't4_lysozyme/T4_mutant_ddG_standardized-results_table.csv',
                     'skempi/skempi_v2_cleaned_NO_1KBH-results_table.csv',
-                    'atlas/ATLAS_cleaned-results_table.csv',
-                    'hsiue_et_al/hsiue_et_al_H2_sat_mut-results_table.csv',
-                    'luksza_et_al/luksza_et_al_tcr1_ec50_sat_mut-results_table.csv',
-                    'luksza_et_al/luksza_et_al_tcr2_ec50_sat_mut-results_table.csv',
-                    'luksza_et_al/luksza_et_al_tcr3_ec50_sat_mut-results_table.csv',
-                    'luksza_et_al/luksza_et_al_tcr4_ec50_sat_mut-results_table.csv',
-                    'luksza_et_al/luksza_et_al_tcr5_ec50_sat_mut-results_table.csv',
-                    'luksza_et_al/luksza_et_al_tcr6_ec50_sat_mut-results_table.csv',
-                    'luksza_et_al/luksza_et_al_tcr7_ec50_sat_mut-results_table.csv',]
+                    'atlas/ATLAS_cleaned-results_table.csv']
 
     dfs = [pd.read_csv(f) for f in table_files]
 
