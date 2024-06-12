@@ -50,7 +50,10 @@ for system_name in ['Ssym_dir', 'Ssym_inv']:
                 sr = -correlations['overall']['spearman'][0]
                 sr_pval = correlations['overall']['spearman'][1]
                 num_measurements = correlations['overall']['count']
-                num_structures = 94
+                if system_name == 'Ssym_dir':
+                    num_structures = 19
+                else:
+                    num_structures = num_measurements
 
             num_measurements_trace.append(num_measurements)
 

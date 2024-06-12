@@ -4,6 +4,9 @@
 *.gz
 *.log
 *.err
+.pytest_cache/
 protein_holography_web/protein_processing/reduce/
 zernikegrams/
 training_data/
+experiments/hsiue_et_al/
+experiments/luksza_et_al/

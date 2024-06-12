@@ -3,4 +3,6 @@ setup.py
 protein_holography_web.egg-info/PKG-INFO
 protein_holography_web.egg-info/SOURCES.txt
 protein_holography_web.egg-info/dependency_links.txt
+protein_holography_web.egg-info/requires.txt
 protein_holography_web.egg-info/top_level.txt
+tests/test_run_hcnn_on_pdbfiles.py
