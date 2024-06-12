@@ -11,7 +11,7 @@ You can run predictions easily on the [Google Colab Notebook](https://colab.rese
 
 ### Installing and running locally
 
-NOTE: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster - which we once managed to do (sigh...). Install `pytorch` with CPU support only, however, gives no issues. Try installing `pytorch` with CUDA first, and if that doesn't work, install it with CPU only. We are working on a foolproof solution - if you have any leads to let us know by posting an Issue.
+NOTE: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster - which we once managed to do (sigh...). Install `pytorch` with CPU support only, however, gives no issues. Try installing `pytorch` with CUDA first, and if that doesn't work, install it with CPU only. We are working on a foolproof solution - if you have any leads please let us know by posting an Issue.
 
 **Step 1:** Create environment and install pytorch.
 ```bash
