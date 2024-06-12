@@ -4,6 +4,7 @@
 *.gz
 *.log
 *.err
+__pycache__/
 .pytest_cache/
 protein_holography_web/protein_processing/reduce/
 zernikegrams/

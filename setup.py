@@ -27,8 +27,14 @@ setuptools.setup(
     include_package_data=True,
     cmdclass={"install": CustomInstall},
     install_requires=[
+        "argparse",
+        "cmake",
         "foldcomp",
+        "biopython==1.83",
+        "h5py==3.10.0",
+        "hdf5plugin==4.4.0",
         "numpy==1.24.3",
+        "matplotlib",
         "e3nn==0.5.0",
         "pandas==1.5.0",
         "tqdm"

@@ -1,35 +1,36 @@
 # protein_holography-web
 
 
-## Colab
-
-You can run predictions easily on the [![Google Colab Notebook](https://colab.research.google.com/drive/1JQxkXeGZJYYcPNglN3rYUYiOuUOkwJPL#scrollTo=pfOyfkx_tvBf)].
+## Usage
 
 
-## Installation
+### Running on Colab
 
-TODO: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster (sigh...). If you install `openmm` **first** (which gets installed upon installing the `zernikegrams` package) and `pytorch` **second**, you can then use the models **without GPU**. For some reason, installing `openmm` second is not working for us, though it does work on the colab environment ¯\_(ツ)_/¯. We are working on a solution.
+You can run predictions easily on the [Google Colab Notebook](https://colab.research.google.com/drive/1JQxkXeGZJYYcPNglN3rYUYiOuUOkwJPL).
 
-We are working towards a streamlined solution that is (mostly) failproof on most environments.
 
-**Step 1:** Create environment and manually install some packages that cannot be installed with pip.
+### Installing and running locally
+
+NOTE: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster - which we once managed to do (sigh...). Install `pytorch` with CPU support only, however, gives no issues. Try installing `pytorch` with CUDA first, and if that doesn't work, install it with CPU only. We are working on a foolproof solution - if you have any leads to let us know by posting an Issue.
+
+**Step 1:** Create environment and install pytorch.
 ```bash
-conda create -n protholo python=3.9.7
+conda create -n protholo python=3.9
 conda activate protholo
 ```
 
 Install `pytorch==1.13.1` with or without CUDA depending on whether you have a GPU available, following https://pytorch.org/get-started/previous-versions/. For example:
 ```bash
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia # for cuda
-
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia # with cuda for gpu support
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c pytorch # cpu only, use this if having issues with step 2
 ```
 
-**Step2:** Install `zernikegrams` package.
+**Step 2:** Install `zernikegrams` package, which we use for protein preprocessing.
 ```bash
 conda install zernikegrams -c william-galvin -c conda-forge
 ```
-TD;DR: if you are experiencing issues with the installation, install `pytorch` after `zernikegrams`, or install `pytorch` first without CUDA.
-This will also install other necessary packages such as `openmm`. As outlined above, we are experiencing a conflict between `openmm` and `pytorch` that we are currently working on resolving, and cannot guarantee GPU support at this time (though it works without issues on colab). \\
+TD;DR: if you are experiencing issues with the installation and you have `pytorch` with CUDA installed, install `pytorch` with CPU only.
+Installing `zernikegrams` will also install other necessary packages such as `openmm`. As outlined above, in our environment we are experiencing a conflict between `openmm` and `pytorch` that we are currently working on resolving, and cannot guarantee GPU support at this time (though it works without issues on colab). \\
 
 
 
@@ -52,8 +53,6 @@ Installation tips:
 2. Somehow can't install pdbfixer AFTER conda
 
 
-
-## Usage
 
 ### Models
 

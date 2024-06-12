@@ -8,59 +8,53 @@ Author-email: gvisan01@.cs.washington.edu
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 Requires-Dist: argparse
-Requires-Dist: biopython
 Requires-Dist: cmake
 Requires-Dist: foldcomp
-Requires-Dist: h5py
-Requires-Dist: hdf5plugin
+Requires-Dist: biopython==1.83
+Requires-Dist: h5py==3.10.0
+Requires-Dist: hdf5plugin==4.4.0
 Requires-Dist: numpy==1.24.3
-Requires-Dist: pyopencl
-Requires-Dist: pytest
-Requires-Dist: torch==1.13.1
+Requires-Dist: matplotlib
 Requires-Dist: e3nn==0.5.0
-Requires-Dist: rich
-Requires-Dist: scikit-learn
-Requires-Dist: sqlitedict
-Requires-Dist: stopit
-Requires-Dist: pyyaml
 Requires-Dist: pandas==1.5.0
 Requires-Dist: tqdm
-Requires-Dist: pyparsing==2.2.1
-Requires-Dist: pillow==10.2.0
 
 # protein_holography-web
 
 
-## Colab
-
-You can run predictions easily on the [![Google Colab Notebook](https://colab.research.google.com/drive/1JQxkXeGZJYYcPNglN3rYUYiOuUOkwJPL#scrollTo=pfOyfkx_tvBf)].
+## Usage
 
 
-## Installation
+### Running on Colab
 
-TODO: this does not work with GPU yet...
+You can run predictions easily on the [Google Colab Notebook](https://colab.research.google.com/drive/1JQxkXeGZJYYcPNglN3rYUYiOuUOkwJPL#scrollTo=pfOyfkx_tvBf).
 
-NOTE: we are working towards making the installation process easier. The current steps - in this order - work on our linux HPC environment. Please post an Issue if you encounter any errors.
+
+### Installing and running locally
+
+TODO: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster (sigh...). If you install `openmm` **first** (which gets installed upon installing the `zernikegrams` package) and `pytorch` **second**, you can then use the models **without GPU**. For some reason, installing `openmm` second is not working for us, though it does work on the colab environment ¯\_(ツ)_/¯. We are working on a solution.
+
+We are working towards a streamlined solution that is (mostly) failproof on most environments.
 
 **Step 1:** Create environment and manually install some packages that cannot be installed with pip.
 ```bash
-conda create -n protholo python=3.9.7
+conda create -n protholo python=3.9
 conda activate protholo
 ```
 
+Install `pytorch==1.13.1` with or without CUDA depending on whether you have a GPU available, following https://pytorch.org/get-started/previous-versions/. For example:
 ```bash
-conda install -c conda-forge pdbfixer==1.9
-conda install -c conda-forge libstdcxx-ng # needed for OpenMM, see https://stackoverflow.com/questions/48453497/anaconda-libstdc-so-6-version-glibcxx-3-4-20-not-found
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia # with cuda for gpu support
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c pytorch # cpu only, use this if having issues with step 2
 ```
 
-**Step 2:** Clone and install `zernikegrams` repo, which is used to process protein structures.
+**Step 2:** Install `zernikegrams` package, which we use for protein preprocessing.
 ```bash
-git clone git@github.com:StatPhysBio/zernikegrams.git
-cd zernikegrams
-pip install .
+conda install zernikegrams -c william-galvin -c conda-forge
 ```
-This clones the repository and installs in the current environmentit using pip, making it usable as a package.
-We will soon make this package available on PyPI for easier download.
+TD;DR: if you are experiencing issues with the installation, install `pytorch` with CPU only after `zernikegrams`.
+Installing `zernikegrams` will also install other necessary packages such as `openmm`. As outlined above, we are experiencing a conflict between `openmm` and `pytorch` that we are currently working on resolving, and cannot guarantee GPU support at this time (though it works without issues on colab). \\
+
 
 
 **(Optional) Step 3:** Install pyrosetta. This is required for the use of models trained on structures processed using pyrosetta. A license is available at no cost to academics and can be obtained [here](https://www.pyrosetta.org/home/licensing-pyrosetta). We are aware of the limitations posed by pyrosetta's license and are working on releasing a version that uss biopython instead and other open source code soon.
@@ -73,21 +67,15 @@ To download pyrosetta, after obtaining a license from the link above, follow ins
 pip install .
 ```
 
-Install `pytorch==1.13.1` with or without CUDA support depending on whether you have a GPU available, following https://pytorch.org/get-started/previous-versions/. For example:
-```bash
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
-```
-
 
 Feel free to use `pip install -e .` instead if you plan on making changes to the code and want to test them without reinstalling the package.
 
 
 Installation tips:
 1. The error `{ENVIRONMENT_PATH}/bin/../lib/libstdc++.so.6: version 'GLIBCXX_3.4.30' not found`, as required by OpenMM, can be fixed via `conda install -c conda-forge libstdcxx-ng`. See https://stackoverflow.com/questions/48453497/anaconda-libstdc-so-6-version-glibcxx-3-4-20-not-found
+2. Somehow can't install pdbfixer AFTER conda
 
 
-
-## Usage
 
 ### Models
 
