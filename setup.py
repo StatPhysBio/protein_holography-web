@@ -27,24 +27,10 @@ setuptools.setup(
     include_package_data=True,
     cmdclass={"install": CustomInstall},
     install_requires=[
-        "argparse",
-        "biopython",
-        "cmake",
         "foldcomp",
-        "h5py",
-        "hdf5plugin",
         "numpy==1.24.3",
-        "pyopencl",
-        "pytest",
         "e3nn==0.5.0",
-        "rich",
-        "scikit-learn",
-        "sqlitedict",
-        "stopit",
-        "pyyaml",
         "pandas==1.5.0",
-        "tqdm",
-        "pyparsing==2.2.1",
-        "pillow==10.2.0"
+        "tqdm"
     ]
 )

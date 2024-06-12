@@ -8,10 +8,9 @@ You can run predictions easily on the [![Google Colab Notebook](https://colab.re
 
 ## Installation
 
-TODO: Currently, there is a conflict between `pdbfixer` and `pytorch`, whereby it's challenging to install both with CUDA support. If you sintall pdbfixer first and pytorch second, you can then use the models **without** 
+TODO: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster (sigh...). If you install `openmm` **first** (which gets installed upon installing the `zernikegrams` package) and `pytorch` **second**, you can then use the models **without GPU**. For some reason, installing `openmm` second is not working for us, though it does work on the colab environment ¯\_(ツ)_/¯. We are working on a solution.
 
-NOTE: we are working towards making the installation process easier. The current steps - in this order - work on our linux HPC environment. Please post an Issue if you encounter any errors.
-
+We are working towards a streamlined solution that is (mostly) failproof on most environments.
 
 **Step 1:** Create environment and manually install some packages that cannot be installed with pip.
 ```bash
@@ -19,24 +18,19 @@ conda create -n protholo python=3.9.7
 conda activate protholo
 ```
 
-Install `pytorch==1.13.1` with or without CUDA support depending on whether you have a GPU available, following https://pytorch.org/get-started/previous-versions/. For example:
+Install `pytorch==1.13.1` with or without CUDA depending on whether you have a GPU available, following https://pytorch.org/get-started/previous-versions/. For example:
 ```bash
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia # for cuda
+
 ```
 
+**Step2:** Install `zernikegrams` package.
 ```bash
-conda install -c conda-forge pdbfixer
-conda install -c conda-forge libstdcxx-ng # needed for OpenMM, see https://stackoverflow.com/questions/48453497/anaconda-libstdc-so-6-version-glibcxx-3-4-20-not-found
+conda install zernikegrams -c william-galvin -c conda-forge
 ```
+TD;DR: if you are experiencing issues with the installation, install `pytorch` after `zernikegrams`, or install `pytorch` first without CUDA.
+This will also install other necessary packages such as `openmm`. As outlined above, we are experiencing a conflict between `openmm` and `pytorch` that we are currently working on resolving, and cannot guarantee GPU support at this time (though it works without issues on colab). \\
 
-**Step 2:** Clone and install `zernikegrams` repo, which is used to process protein structures.
-```bash
-git clone git@github.com:StatPhysBio/zernikegrams.git
-cd zernikegrams
-pip install .
-```
-This clones the repository and installs in the current environmentit using pip, making it usable as a package.
-We will soon make this package available on PyPI for easier download.
 
 
 **(Optional) Step 3:** Install pyrosetta. This is required for the use of models trained on structures processed using pyrosetta. A license is available at no cost to academics and can be obtained [here](https://www.pyrosetta.org/home/licensing-pyrosetta). We are aware of the limitations posed by pyrosetta's license and are working on releasing a version that uss biopython instead and other open source code soon.
