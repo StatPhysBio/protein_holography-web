@@ -1,244 +1,0 @@
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [02:48<00:00, 168.22s/it]100%|██████████| 1/1 [02:48<00:00, 168.22s/it]
-  0%|          | 0/180 [00:00<?, ?it/s]  1%|          | 1/180 [00:00<00:23,  7.69it/s] 28%|██▊       | 50/180 [00:00<00:00, 257.44it/s] 56%|█████▌    | 100/180 [00:00<00:00, 358.05it/s] 83%|████████▎ | 150/180 [00:00<00:00, 409.19it/s]100%|██████████| 180/180 [00:00<00:00, 362.21it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p00/zero_shot_predictions/luksza_et_al_tcr2_ec50_sat_mut-HCNN_proteinnet_0p00-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:54<00:00, 114.24s/it]100%|██████████| 1/1 [01:54<00:00, 114.24s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 27%|██▋       | 49/180 [00:00<00:00, 481.00it/s] 55%|█████▌    | 99/180 [00:00<00:00, 488.22it/s] 83%|████████▎ | 149/180 [00:00<00:00, 491.78it/s]100%|██████████| 180/180 [00:00<00:00, 491.81it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p50/zero_shot_predictions/luksza_et_al_tcr2_ec50_sat_mut-HCNN_proteinnet_0p50-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:07<00:00, 67.54s/it]100%|██████████| 1/1 [01:07<00:00, 67.54s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 27%|██▋       | 48/180 [00:00<00:00, 472.75it/s] 54%|█████▍    | 97/180 [00:00<00:00, 479.81it/s] 81%|████████  | 146/180 [00:00<00:00, 484.17it/s]100%|██████████| 180/180 [00:00<00:00, 484.73it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p00/zero_shot_predictions/luksza_et_al_tcr3_ec50_sat_mut-HCNN_proteinnet_0p00-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:01<00:00, 61.40s/it]100%|██████████| 1/1 [01:01<00:00, 61.40s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 27%|██▋       | 48/180 [00:00<00:00, 476.79it/s] 54%|█████▍    | 97/180 [00:00<00:00, 483.95it/s] 82%|████████▏ | 147/180 [00:00<00:00, 487.84it/s]100%|██████████| 180/180 [00:00<00:00, 487.19it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p50/zero_shot_predictions/luksza_et_al_tcr3_ec50_sat_mut-HCNN_proteinnet_0p50-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:11<00:00, 71.67s/it]100%|██████████| 1/1 [01:11<00:00, 71.67s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 464.25it/s] 53%|█████▎    | 95/180 [00:00<00:00, 472.94it/s] 80%|████████  | 144/180 [00:00<00:00, 476.77it/s]100%|██████████| 180/180 [00:00<00:00, 475.91it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p00/zero_shot_predictions/luksza_et_al_tcr4_ec50_sat_mut-HCNN_proteinnet_0p00-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:09<00:00, 69.13s/it]100%|██████████| 1/1 [01:09<00:00, 69.13s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 27%|██▋       | 48/180 [00:00<00:00, 474.45it/s] 54%|█████▍    | 97/180 [00:00<00:00, 482.02it/s] 82%|████████▏ | 147/180 [00:00<00:00, 485.83it/s]100%|██████████| 180/180 [00:00<00:00, 485.82it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p50/zero_shot_predictions/luksza_et_al_tcr4_ec50_sat_mut-HCNN_proteinnet_0p50-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:04<00:00, 64.28s/it]100%|██████████| 1/1 [01:04<00:00, 64.28s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 467.18it/s] 53%|█████▎    | 95/180 [00:00<00:00, 471.68it/s] 79%|███████▉  | 143/180 [00:00<00:00, 473.72it/s]100%|██████████| 180/180 [00:00<00:00, 474.47it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p00/zero_shot_predictions/luksza_et_al_tcr5_ec50_sat_mut-HCNN_proteinnet_0p00-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:07<00:00, 67.95s/it]100%|██████████| 1/1 [01:07<00:00, 67.95s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 467.87it/s] 53%|█████▎    | 95/180 [00:00<00:00, 474.91it/s] 80%|████████  | 144/180 [00:00<00:00, 480.04it/s]100%|██████████| 180/180 [00:00<00:00, 480.64it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p50/zero_shot_predictions/luksza_et_al_tcr5_ec50_sat_mut-HCNN_proteinnet_0p50-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:20<00:00, 80.52s/it]100%|██████████| 1/1 [01:20<00:00, 80.52s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 46/180 [00:00<00:00, 457.28it/s] 52%|█████▏    | 94/180 [00:00<00:00, 465.52it/s] 79%|███████▉  | 142/180 [00:00<00:00, 469.94it/s]100%|██████████| 180/180 [00:00<00:00, 469.36it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p00/zero_shot_predictions/luksza_et_al_tcr6_ec50_sat_mut-HCNN_proteinnet_0p00-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:19<00:00, 79.03s/it]100%|██████████| 1/1 [01:19<00:00, 79.03s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 468.31it/s] 53%|█████▎    | 95/180 [00:00<00:00, 471.75it/s] 79%|███████▉  | 143/180 [00:00<00:00, 473.59it/s]100%|██████████| 180/180 [00:00<00:00, 475.26it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p50/zero_shot_predictions/luksza_et_al_tcr6_ec50_sat_mut-HCNN_proteinnet_0p50-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:24<00:00, 84.29s/it]100%|██████████| 1/1 [01:24<00:00, 84.29s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 465.00it/s] 53%|█████▎    | 95/180 [00:00<00:00, 471.25it/s] 79%|███████▉  | 143/180 [00:00<00:00, 472.15it/s]100%|██████████| 180/180 [00:00<00:00, 473.86it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p00/zero_shot_predictions/luksza_et_al_tcr7_ec50_sat_mut-HCNN_proteinnet_0p00-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:10<00:00, 70.26s/it]100%|██████████| 1/1 [01:10<00:00, 70.26s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 467.80it/s] 53%|█████▎    | 95/180 [00:00<00:00, 471.38it/s] 80%|████████  | 144/180 [00:00<00:00, 476.52it/s]100%|██████████| 180/180 [00:00<00:00, 476.45it/s]
-Traceback (most recent call last):
-  File "/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/plots.py", line 35, in <module>
-    df_full = pd.read_csv(os.path.join(this_file_dir, f'{model_version}', 'zero_shot_predictions', f'{system_identifier}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 211, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/util/_decorators.py", line 317, in wrapper
-    return func(*args, **kwargs)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
-    return _read(filepath_or_buffer, kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 605, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
-    self._engine = self._make_engine(f, self.engine)
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1729, in _make_engine
-    self.handles = get_handle(
-  File "/gscratch/spe/gvisan01/miniconda3/envs/protholo_web/lib/python3.9/site-packages/pandas/io/common.py", line 857, in get_handle
-    handle = open(
-FileNotFoundError: [Errno 2] No such file or directory: '/mmfs1/gscratch/spe/gvisan01/protein_holography-web/experiments/luksza_et_al/HCNN_proteinnet_0p50/zero_shot_predictions/luksza_et_al_tcr7_ec50_sat_mut-HCNN_proteinnet_0p50-use_mt_structure=0.csv'
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:12<00:00, 72.42s/it]100%|██████████| 1/1 [01:12<00:00, 72.42s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 462.45it/s] 53%|█████▎    | 95/180 [00:00<00:00, 467.55it/s] 79%|███████▉  | 143/180 [00:00<00:00, 471.42it/s]100%|██████████| 180/180 [00:00<00:00, 472.37it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:54<00:00, 54.84s/it]100%|██████████| 1/1 [00:54<00:00, 54.84s/it]
-  0%|          | 0/180 [00:00<?, ?it/s] 26%|██▌       | 47/180 [00:00<00:00, 462.35it/s] 53%|█████▎    | 95/180 [00:00<00:00, 469.65it/s] 79%|███████▉  | 143/180 [00:00<00:00, 472.06it/s]100%|██████████| 180/180 [00:00<00:00, 472.29it/s]
