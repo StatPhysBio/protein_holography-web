@@ -4,6 +4,7 @@
 *.gz
 *.log
 *.err
+TODO.md
 __pycache__/
 .pytest_cache/
 protein_holography_web/protein_processing/reduce/

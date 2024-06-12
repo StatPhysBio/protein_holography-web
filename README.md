@@ -115,14 +115,3 @@ See `experiments/full_results_table.csv` for a comprehensive list of results.
 
 
 
-
-
-
-## TODO
-
-[X] Produce table with all correlation predictions \\
-[X] Add usage details in README, showing examples \\
-[X] Better documentation of main scripts (especially argparse of mutation_effect_prediction) \\
-[] Make colab (include it here, so people can use it as a jupyter notebook) \\
-[] Add option to *delete chains other than the requested ones*.
-
