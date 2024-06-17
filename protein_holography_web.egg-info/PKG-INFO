@@ -27,16 +27,14 @@ Requires-Dist: tqdm
 
 ### Running on Colab
 
-You can run predictions easily on the [Google Colab Notebook](https://colab.research.google.com/drive/1JQxkXeGZJYYcPNglN3rYUYiOuUOkwJPL#scrollTo=pfOyfkx_tvBf).
+You can run predictions easily on the [Google Colab Notebook](https://colab.research.google.com/drive/1JQxkXeGZJYYcPNglN3rYUYiOuUOkwJPL).
 
 
 ### Installing and running locally
 
-TODO: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster (sigh...). If you install `openmm` **first** (which gets installed upon installing the `zernikegrams` package) and `pytorch` **second**, you can then use the models **without GPU**. For some reason, installing `openmm` second is not working for us, though it does work on the colab environment ¯\_(ツ)_/¯. We are working on a solution.
+NOTE: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster - which we once managed to do (sigh...). Install `pytorch` with CPU support only, however, gives no issues. Try installing `pytorch` with CUDA first, and if that doesn't work, install it with CPU only. We are working on a foolproof solution - if you have any leads to let us know by posting an Issue.
 
-We are working towards a streamlined solution that is (mostly) failproof on most environments.
-
-**Step 1:** Create environment and manually install some packages that cannot be installed with pip.
+**Step 1:** Create environment and install pytorch.
 ```bash
 conda create -n protholo python=3.9
 conda activate protholo
@@ -52,8 +50,8 @@ conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c 
 ```bash
 conda install zernikegrams -c william-galvin -c conda-forge
 ```
-TD;DR: if you are experiencing issues with the installation, install `pytorch` with CPU only after `zernikegrams`.
-Installing `zernikegrams` will also install other necessary packages such as `openmm`. As outlined above, we are experiencing a conflict between `openmm` and `pytorch` that we are currently working on resolving, and cannot guarantee GPU support at this time (though it works without issues on colab). \\
+TD;DR: if you are experiencing issues with the installation and you have `pytorch` with CUDA installed, install `pytorch` with CPU only.
+Installing `zernikegrams` will also install other necessary packages such as `openmm`. As outlined above, in our environment we are experiencing a conflict between `openmm` and `pytorch` that we are currently working on resolving, and cannot guarantee GPU support at this time (though it works without issues on colab). \\
 
 
 
@@ -137,15 +135,4 @@ Run `python zero_shot_mutation_effect_prediction_with_hcnn.py -h` for more infor
 See `experiments/full_results_table.csv` for a comprehensive list of results.
 
 
-
-
-
-
-## TODO
-
-[X] Produce table with all correlation predictions \\
-[X] Add usage details in README, showing examples \\
-[X] Better documentation of main scripts (especially argparse of mutation_effect_prediction) \\
-[] Make colab (include it here, so people can use it as a jupyter notebook) \\
-[] Add option to *delete chains other than the requested ones*.
 

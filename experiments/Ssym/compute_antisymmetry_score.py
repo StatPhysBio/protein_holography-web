@@ -17,17 +17,22 @@ if __name__ == '__main__':
     parser.add_argument('--use_mt_structure', type=int, default=0)
     args = parser.parse_args()
 
-
+    if 'proteinmpnn' in args.model_version:
+        model_version_in_filename = 'num_seq_per_target=10'
+        pred_column = 'log_p_mt__minus__log_p_wt'
+    else:
+        model_version_in_filename = args.model_version
+        pred_column = 'log_proba_mt__minus__log_proba_wt'
+    
     ## assume the two dataframes are parallel, i.e. that each row represents the same site, antisymmetric in each respective dataframe
-
-    dir_df = pd.read_csv(f'Ssym_dir/{args.model_version}/zero_shot_predictions/ssym_dir_ddg_experimental-{args.model_version}-use_mt_structure={args.use_mt_structure}.csv')
+    dir_df = pd.read_csv(f'Ssym_dir/{args.model_version}/zero_shot_predictions/ssym_dir_ddg_experimental-{model_version_in_filename}-use_mt_structure={args.use_mt_structure}.csv')
     dir_experimental_scores = dir_df['score'].values
-    dir_predicted_scores = dir_df['log_proba_mt__minus__log_proba_wt'].values
+    dir_predicted_scores = dir_df[pred_column].values
     dir_pdbids = dir_df['pdbid'].values
 
-    inv_df = pd.read_csv(f'Ssym_inv/{args.model_version}/zero_shot_predictions/ssym_inv_ddg_experimental-{args.model_version}-use_mt_structure={args.use_mt_structure}.csv')
+    inv_df = pd.read_csv(f'Ssym_inv/{args.model_version}/zero_shot_predictions/ssym_inv_ddg_experimental-{model_version_in_filename}-use_mt_structure={args.use_mt_structure}.csv')
     inv_experimental_scores = inv_df['score'].values
-    inv_predicted_scores = inv_df['log_proba_mt__minus__log_proba_wt'].values
+    inv_predicted_scores = inv_df[pred_column].values
     inv_pdbids = inv_df['pdbid'].values
 
     mask = np.isfinite(dir_experimental_scores) & np.isfinite(dir_predicted_scores) & np.isfinite(inv_experimental_scores) & np.isfinite(inv_predicted_scores)

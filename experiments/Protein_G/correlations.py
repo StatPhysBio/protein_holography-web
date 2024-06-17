@@ -15,14 +15,19 @@ if __name__ == '__main__':
     parser.add_argument('--system_name', type=str, required=True)
     args = parser.parse_args()
 
+    if 'proteinmpnn' in args.model_version:
+        model_version_in_filename = 'num_seq_per_target=10'
+        pred_column = 'log_p_mt__minus__log_p_wt'
+    else:
+        model_version_in_filename = args.model_version
+        pred_column = 'log_proba_mt__minus__log_proba_wt'
 
     df_rosetta = pd.read_csv(f'{args.system_name}_ddg_rosetta.csv')
     rosetta_scores_dict = {'-'.join([pdbid, chainid, variant]): score for pdbid, chainid, variant, score in zip(df_rosetta['pdbid'].values, df_rosetta['chainid'].values, df_rosetta['variant'].values, df_rosetta['score'].values)}
 
-
-    df = pd.read_csv(f'{args.model_version}/zero_shot_predictions/{args.system_name}_ddg_experimental-{args.model_version}-use_mt_structure={args.use_mt_structure}.csv')
+    df = pd.read_csv(f'{args.model_version}/zero_shot_predictions/{args.system_name}_ddg_experimental-{model_version_in_filename}-use_mt_structure={args.use_mt_structure}.csv')
     experimental_scores = df['score'].values
-    predicted_scores = df['log_proba_mt__minus__log_proba_wt'].values
+    predicted_scores = df[pred_column].values
     pdbids = df['pdbid'].values
     chainids = df['chainid'].values
     variants = df['variant'].values
@@ -111,5 +116,5 @@ if __name__ == '__main__':
         }  
     
     # save correlations
-    with open(f'{args.model_version}/zero_shot_predictions/{args.system_name}_ddg_experimental-{args.model_version}-use_mt_structure={args.use_mt_structure}_correlations.json', 'w') as f:
+    with open(f'{args.model_version}/zero_shot_predictions/{args.system_name}_ddg_experimental-{model_version_in_filename}-use_mt_structure={args.use_mt_structure}_correlations.json', 'w') as f:
         json.dump(correlations, f, indent=4)

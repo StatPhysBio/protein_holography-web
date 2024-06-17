@@ -71,11 +71,11 @@ def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, mode
     print('Region IDs:', region_ids)
 
     requested_regions = {'region': region_ids}
-    # try:
-    ensemble_predictions_dict = predict_from_pdbfile(os.path.join(pdbdir, f'{pdb}.pdb'), models, hparams, 256, regions=requested_regions)
-    # except Exception as e:
-    #     print(f'Error making predictions for {pdb} {chain} {resnums}: {e}')
-    #     return
+    try:
+        ensemble_predictions_dict = predict_from_pdbfile(os.path.join(pdbdir, f'{pdb}.pdb'), models, hparams, 256, regions=requested_regions)
+    except Exception as e:
+        print(f'Error making predictions for {pdb} {chain} {resnums}: {e}')
+        return
     
     ensemble_predictions_dict = ensemble_predictions_dict['region']
     pes = np.mean(ensemble_predictions_dict['logits'], axis=0)
@@ -90,12 +90,15 @@ def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, mode
         if pes.shape[0] != resnums_in_res_ids.shape[0]:
             print('Shape mismatch in pes. Super weird. Skipping.')
             return
+    
+    wt_aas_in_res_ids = ensemble_predictions_dict['res_ids'][:, 0]
 
     os.makedirs(output_dir, exist_ok=True)
     np.savez(os.path.join(output_dir, f"{make_filename(model_version, pdb, chain, resnums)}.npz"),
                 pes=pes,
                 logps=logps,
                 resnums=resnums_in_res_ids, # using the correct resnums, which match the predictions for sure
+                wt_aas=wt_aas_in_res_ids,
                 chain=chain)
 
 
@@ -138,7 +141,7 @@ if __name__ == '__main__':
     parser.add_argument('--dont_run_inference', type=int, default=0, choices=[0, 1],
                         help='1 for True, 0 for False. If True, will not run inference, only parse the .npz files. Mainly intended for debugging purposes.')
     
-    # These are only used for making a scatter plot. Useful for a quick visualization. Donot need to use them
+    # These are only used for making a scatter plot. Useful for a quick visualization. Do not need to use them
     parser.add_argument('--dms_column', type=optional_str, default=None,
                         help='Column with the values you want to correlater with (e.g. ddg)')
     
@@ -230,8 +233,9 @@ if __name__ == '__main__':
                 if pdb not in pdb_to_chain_to_resnums:
                     pdb_to_chain_to_resnums[pdb] = {}
                 if chain not in pdb_to_chain_to_resnums[pdb]:
-                    pdb_to_chain_to_resnums[pdb][chain] = []
-                pdb_to_chain_to_resnums[pdb][chain].append(resnum)
+                    pdb_to_chain_to_resnums[pdb][chain] = set()
+                
+                pdb_to_chain_to_resnums[pdb][chain].add(resnum)
     
     print(pdb_to_chain_to_resnums)
         
@@ -242,6 +246,7 @@ if __name__ == '__main__':
         for pdb in tqdm(pdb_to_chain_to_resnums):
             for chain, resnums in pdb_to_chain_to_resnums[pdb].items():
                 ## split resnums into chunks of at most 20 otherwise I might get "File name too long" error
+                resnums = list(sorted(list(resnums)))
                 CHUNK_SIZE = 20
                 resnums_chunks = [resnums[i:i+CHUNK_SIZE] for i in range(0, len(resnums), CHUNK_SIZE)]
                 for res_chunk in resnums_chunks:
@@ -326,6 +331,14 @@ if __name__ == '__main__':
                 temp_log_proba_wt.append(np.nan)
                 temp_log_proba_mt.append(np.nan)
                 continue
+                
+            # check that the wildtype amino-acids as they are in the csv file match the amino-acids in the structure
+            aa_wt_in_structure = wt_data['wt_aas'][np.where(wt_data['resnums'] == resnum)[0][0]].decode('utf-8')
+            assert aa_wt_in_structure == aa_wt, f'Wildtype residue mismatch! {aa_wt_in_structure} != {aa_wt} at {wt_pdb} {chain} {resnum}'
+
+            if args.use_mt_structure:
+                aa_mt_in_structure = mt_data['wt_aas'][np.where(mt_data['resnums'] == resnum)[0][0]].decode('utf-8')
+                assert aa_mt_in_structure == aa_mt, f'Mutant residue mismatch! {aa_mt_in_structure} != {aa_mt} at {wt_pdb} {chain} {resnum}'
             
             wt_pe = wt_data['pes'][np.where(wt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_wt]]
             mt_pe = mt_data['pes'][np.where(mt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_mt]]

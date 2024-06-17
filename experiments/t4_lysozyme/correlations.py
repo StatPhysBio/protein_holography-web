@@ -14,10 +14,16 @@ if __name__ == '__main__':
     parser.add_argument('--use_mt_structure', type=int, default=0)
     args = parser.parse_args()
 
+    if 'proteinmpnn' in args.model_version:
+        model_version_in_filename = 'num_seq_per_target=10'
+        pred_column = 'log_p_mt__minus__log_p_wt'
+    else:
+        model_version_in_filename = args.model_version
+        pred_column = 'log_proba_mt__minus__log_proba_wt'
 
-    df = pd.read_csv(f'{args.model_version}/zero_shot_predictions/T4_mutant_ddG_standardized-{args.model_version}-use_mt_structure={args.use_mt_structure}.csv')
+    df = pd.read_csv(f'{args.model_version}/zero_shot_predictions/T4_mutant_ddG_standardized-{model_version_in_filename}-use_mt_structure={args.use_mt_structure}.csv')
     experimental_scores = df['ddG'].values
-    predicted_scores = df['log_proba_mt__minus__log_proba_wt'].values
+    predicted_scores = df[pred_column].values
     pdbids = df['wt_pdb'].values
 
     mask = np.logical_and(~np.isnan(experimental_scores), ~np.isnan(predicted_scores))
@@ -47,7 +53,7 @@ if __name__ == '__main__':
         }
     
     # save correlations
-    with open(f'{args.model_version}/zero_shot_predictions/T4_mutant_ddG_standardized-{args.model_version}-use_mt_structure={args.use_mt_structure}_correlations.json', 'w') as f:
+    with open(f'{args.model_version}/zero_shot_predictions/T4_mutant_ddG_standardized-{model_version_in_filename}-use_mt_structure={args.use_mt_structure}_correlations.json', 'w') as f:
         json.dump(correlations, f, indent=4)
 
 

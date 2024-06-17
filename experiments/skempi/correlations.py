@@ -25,6 +25,14 @@ if __name__ == '__main__':
     mutation_column = 'mutant'
     pdb_column = 'PDB_filename'
 
+    target_column = 'ddg'
+
+    if 'proteinmpnn' in args.model_version:
+        model_version_in_filename = 'num_seq_per_target=10'
+        prediction_column = 'log_p_mt__minus__log_p_wt'
+    else:
+        model_version_in_filename = args.model_version
+        prediction_column = 'log_proba_mt__minus__log_proba_wt'
 
     correlations_dict = {
         'Overall': {},
@@ -33,10 +41,10 @@ if __name__ == '__main__':
     
     for num_mut_mode in ['all_types_of_mutations', 'single_point_mutations', 'multi_point_mutations']:
 
-        df_full = pd.read_csv(os.path.join(this_file_dir, model_version, 'zero_shot_predictions', f'{system_name_in_csv_file}-{model_version}-use_mt_structure={use_mt_structure}.csv'))
+        df_full = pd.read_csv(os.path.join(this_file_dir, model_version, 'zero_shot_predictions', f'{system_name_in_csv_file}-{model_version_in_filename}-use_mt_structure={use_mt_structure}.csv'))
 
         # # filter out nans and infs
-        df_full = df_full.loc[np.isfinite(df_full['log_proba_mt__minus__log_proba_wt'].values)].reset_index(drop=True)
+        df_full = df_full.loc[np.isfinite(df_full[prediction_column].values)].reset_index(drop=True)
 
         if num_mut_mode == 'single_point_mutations':
             is_single_point_mutation = [len(mutation.split('|')) == 1 for mutation in df_full[mutation_column]]
@@ -57,9 +65,6 @@ if __name__ == '__main__':
         df_full['to_merge'] = [pdb+mut for pdb, mut in zip(df_full['#Pdb'], df_full['Mutation(s)_cleaned'])]
         df_full = df_full.drop_duplicates(subset=['to_merge']) # drops our duplicates, DSSMBind has no duplicates already
         df_full = df_full.merge(df_dsmbind, on=['to_merge'], how='inner')
-
-        prediction_column = 'log_proba_mt__minus__log_proba_wt'
-        target_column = 'ddg'
 
 
         # exlude nans and infs, keep only one wildtype measurement
@@ -108,7 +113,7 @@ if __name__ == '__main__':
         pr, pr_pval, sr, sr_pval, num, num_struc = get_correlations(df_full, do_group_structures=True)
         correlations_dict['Per-Structure'][num_mut_mode] = {'Pr': float(pr), 'Pr_pval': float(pr_pval), 'Sr': float(sr), 'Sr_pval': float(sr_pval), 'num': float(num), 'num_struc': float(num_struc)}
 
-    with open(os.path.join(this_file_dir, model_version, 'zero_shot_predictions', f'{system_name_in_csv_file}-{model_version}-use_mt_structure={use_mt_structure}-correlations.json'), 'w') as f:
+    with open(os.path.join(this_file_dir, model_version, 'zero_shot_predictions', f'{system_name_in_csv_file}-{model_version_in_filename}-use_mt_structure={use_mt_structure}-correlations.json'), 'w') as f:
         json.dump(correlations_dict, f, indent=4)
 
 

@@ -12,3 +12,4 @@ zernikegrams/
 training_data/
 experiments/hsiue_et_al/
 experiments/luksza_et_al/
+*/.DS_store
