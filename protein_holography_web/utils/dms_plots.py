@@ -293,6 +293,7 @@ def dms_scatter_plot(
         df[dms_column], df[pred_column],
         s=markersize,
         c=color,
+        alpha=0.5,
         zorder=2
     )
 
