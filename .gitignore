@@ -14,4 +14,4 @@ training_data/
 experiments/hsiue_et_al/
 experiments/luksza_et_al/
 */.DS_store
-*/.raw_df_from_esm.csv
+*/raw_df_from_esm.csv
