@@ -6,7 +6,7 @@ import pandas as pd
 
 
 sys.path.append('..')
-from get_full_table import METADATA_COLUMNS, MODELS
+from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS
 
 
 system_name = 'T4_mutant_ddG_standardized'
@@ -19,11 +19,14 @@ for use_mt_structure in [0, 1]:
 
     num_measurements_trace = []
 
-    for hcnn_model in MODELS:
+    for model in HCNN_MODELS + PROTEINMPNN_MODELS:
 
-        # load json file with correlations
-        with open(f'{hcnn_model}/zero_shot_predictions/{system_name}-{hcnn_model}-use_mt_structure={use_mt_structure}_correlations.json', 'r') as f:
-            correlations = json.load(f)
+        if model in HCNN_MODELS:
+            with open(f'{model}/zero_shot_predictions/{system_name}-{model}-use_mt_structure={use_mt_structure}_correlations.json', 'r') as f:
+                correlations = json.load(f)
+        elif model in PROTEINMPNN_MODELS:
+            with open(f'{model}/zero_shot_predictions/{system_name}-num_seq_per_target=10-use_mt_structure={use_mt_structure}_correlations.json', 'r') as f:
+                correlations = json.load(f)
         
         pr = -correlations['2LZM']['pearson'][0] # flip correlation so higher is better
         pr_pval = correlations['2LZM']['pearson'][1] # flip correlation so higher is better
@@ -34,10 +37,10 @@ for use_mt_structure in [0, 1]:
         num_measurements = correlations['2LZM']['count']
         num_measurements_trace.append(num_measurements)
 
-        correlations_values_in_table[hcnn_model + ' - Pearsonr'] = pr
-        correlations_values_in_table[hcnn_model + ' - Pearsonr p-value'] = pr_pval
-        correlations_values_in_table[hcnn_model + ' - Spearmanr'] = sr
-        correlations_values_in_table[hcnn_model + ' - Spearmanr p-value'] = sr_pval
+        correlations_values_in_table[model + ' - Pearsonr'] = pr
+        correlations_values_in_table[model + ' - Pearsonr p-value'] = pr_pval
+        correlations_values_in_table[model + ' - Spearmanr'] = sr
+        correlations_values_in_table[model + ' - Spearmanr p-value'] = sr_pval
 
     if len(set(num_measurements_trace)) > 1:
         print('WARNINGL Number of measurements for each model is not the same')

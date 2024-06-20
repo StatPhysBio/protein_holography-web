@@ -2,6 +2,7 @@ Important Note: The alpha fold structure and the pdb structure differ because th
 
 McLaughlin Jr, R., Poelwijk, F., Raman, A. et al. The spatial architecture of protein function and adaptation. Nature 491, 138–142 (2012). https://doi.org/10.1038/nature11500
 The paper references the pdb 1BE9, which may be the proper representation because what the paper is measuring is the ability for the protein to bond to a ligand, and it is sequenced after bonding. 
+5HDY also seems to be a good representation of the protein, and it has the right amino-acid sequence, and a different ligant (small molecule, not peptide).
 
 DMS Seq:
 PRRIVIHRGSTGLGFNIVGGEDGEGIFISFILAGGPADLSGELRKGDQILSVNGVDLRNASHEQAAIALKNAGQTVTIIAQYK

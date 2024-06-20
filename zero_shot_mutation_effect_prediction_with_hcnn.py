@@ -12,7 +12,7 @@ TODO to make it even faster: collect zernikegrams from multiple PDBs in a single
 
 '''
 
-import os
+import os, sys
 import glob
 import json
 import numpy as np
@@ -142,12 +142,8 @@ if __name__ == '__main__':
                         help='1 for True, 0 for False. If True, will not run inference, only parse the .npz files. Mainly intended for debugging purposes.')
     
     # These are only used for making a scatter plot. Useful for a quick visualization. Do not need to use them
-    parser.add_argument('--dms_column', type=optional_str, default=None,
+    parser.add_argument('--dms_column', type=optional_str, nargs='+', default=None,
                         help='Column with the values you want to correlater with (e.g. ddg)')
-    
-    parser.add_argument('--dms_label', type=optional_str, default=None,
-                        help='Optional label to substitute dms_column in the scatter plot')
-
 
     parser.add_argument('--num_splits', type=int, default=1, help='Number of splits to make in the CSV file. Useful for parallelizing the script.')
     parser.add_argument('--split_idx', type=int, default=0, help='Split index')
@@ -186,6 +182,14 @@ if __name__ == '__main__':
         output_file_identifier = f'-{args.model_version}-use_mt_structure={args.use_mt_structure}-split={args.split_idx}_{args.num_splits}.csv'
         indices = np.array_split(df.index, args.num_splits)
         df = df.loc[indices[args.split_idx]]
+    
+    csv_filename_out = os.path.basename(args.csv_file).split('/')[-1].replace('.csv', output_file_identifier)
+    if not csv_filename_out.endswith('.csv'):
+        csv_filename_out += '.csv'
+    
+    if os.path.exists(os.path.join(zero_shot_predictions_dir, csv_filename_out.replace('.csv', '_correlations.json'))):
+        exit(0)
+
 
 
     # get pdbs
@@ -288,6 +292,14 @@ if __name__ == '__main__':
             aa_mt = mutant[-1]
             resnum = int(mutant[1:-1])
 
+            if aa_mt == 'X':
+                print(f'WARNING: Mutant amino-acid is X at {wt_pdb} {chain} {resnum}.', file=sys.stderr)
+                temp_pe_wt.append(np.nan)
+                temp_pe_mt.append(np.nan)
+                temp_log_proba_wt.append(np.nan)
+                temp_log_proba_mt.append(np.nan)
+                continue
+
             wt_file = get_file_that_matches_specs(inference_dir, args.model_version, wt_pdb, chain, resnum)
             if wt_file is None:
                 print(f'WARNING: No file found for {wt_pdb} {chain} {resnum}.')
@@ -334,12 +346,26 @@ if __name__ == '__main__':
                 
             # check that the wildtype amino-acids as they are in the csv file match the amino-acids in the structure
             aa_wt_in_structure = wt_data['wt_aas'][np.where(wt_data['resnums'] == resnum)[0][0]].decode('utf-8')
-            assert aa_wt_in_structure == aa_wt, f'Wildtype residue mismatch! {aa_wt_in_structure} != {aa_wt} at {wt_pdb} {chain} {resnum}'
+            # assert aa_wt_in_structure == aa_wt, f'Wildtype residue mismatch! {aa_wt_in_structure} != {aa_wt} at {wt_pdb} {chain} {resnum}'
+            if aa_wt_in_structure != aa_wt:
+                print(f'\nWARNING: Wildtype residue mismatch! {aa_wt_in_structure} != {aa_wt} at {wt_pdb} {chain} {resnum}\n', file=sys.stderr)
+                temp_pe_wt.append(np.nan)
+                temp_pe_mt.append(np.nan)
+                temp_log_proba_wt.append(np.nan)
+                temp_log_proba_mt.append(np.nan)
+                continue
 
             if args.use_mt_structure:
                 aa_mt_in_structure = mt_data['wt_aas'][np.where(mt_data['resnums'] == resnum)[0][0]].decode('utf-8')
-                assert aa_mt_in_structure == aa_mt, f'Mutant residue mismatch! {aa_mt_in_structure} != {aa_mt} at {wt_pdb} {chain} {resnum}'
-            
+                # assert aa_mt_in_structure == aa_mt, f'Mutant residue mismatch! {aa_mt_in_structure} != {aa_mt} at {wt_pdb} {chain} {resnum}'
+                if aa_mt_in_structure != aa_mt:
+                    print(f'\nWARNING: Mutant residue mismatch! {aa_mt_in_structure} != {aa_mt} at {mt_pdb} {chain} {resnum}\n', file=sys.stderr)
+                    temp_pe_wt.append(np.nan)
+                    temp_pe_mt.append(np.nan)
+                    temp_log_proba_wt.append(np.nan)
+                    temp_log_proba_mt.append(np.nan)
+                    continue
+
             wt_pe = wt_data['pes'][np.where(wt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_wt]]
             mt_pe = mt_data['pes'][np.where(mt_data['resnums'] == resnum)[0][0], ol_to_ind_size[aa_mt]]
 
@@ -362,18 +388,17 @@ if __name__ == '__main__':
     df['log_proba_mt'] = log_proba_mt_all
     df['log_proba_mt__minus__log_proba_wt'] = df['log_proba_mt'] - df['log_proba_wt']
 
-    csv_filename_out = os.path.basename(args.csv_file).split('/')[-1].replace('.csv', output_file_identifier)
-    if not csv_filename_out.endswith('.csv'):
-        csv_filename_out += '.csv'
+
     df.to_csv(os.path.join(zero_shot_predictions_dir, csv_filename_out), index=False)
 
 
     if args.dms_column is not None:
-        args.dms_column = args.dms_column.strip('[ ').strip(' ]')
-        dms_filepath = os.path.join(zero_shot_predictions_dir, f'correlation-{csv_filename_out.replace(".csv", ".png")}')
-        (pearson_r, pearson_pval), (spearman_r, spearman_pval) = dms_scatter_plot(df,
-                                                                                  args.dms_column, 'log_proba_mt__minus__log_proba_wt',
-                                                                                  dms_label=args.dms_label, pred_label=r'H-CNN Prediction',
+        for dms_column in args.dms_column:
+            dms_column = dms_column.strip('[ ').strip(' ]')
+            dms_filepath = os.path.join(zero_shot_predictions_dir, f'correlation_with_{dms_column}-{csv_filename_out.replace(".csv", ".png")}')
+            (pearson_r, pearson_pval), (spearman_r, spearman_pval) = dms_scatter_plot(df,
+                                                                                  dms_column, 'log_proba_mt__minus__log_proba_wt',
+                                                                                  dms_label=None, pred_label=r'H-CNN Prediction',
                                                                                   filename = dms_filepath)
         
         

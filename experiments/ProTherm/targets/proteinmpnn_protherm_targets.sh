@@ -9,7 +9,7 @@ model_version_list='v_48_030' # 'v_48_030 v_48_020 v_48_002'
 for model_version in $model_version_list
     do
 
-    python -u $proteinmpnn_dir'zero_shot_mutation_effect_prediction.py' \
+    python -u $proteinmpnn_dir'zero_shot_mutation_effect_prediction__faster.py' \
                     --csv_file $base_dir'protherm_targets_ddg_experimental.csv' \
                     --folder_with_pdbs $base_dir'pdbs/' \
                     --output_dir $base_dir'proteinmpnn_'$model_version \

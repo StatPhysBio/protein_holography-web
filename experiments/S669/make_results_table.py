@@ -7,7 +7,7 @@ from scipy.stats import combine_pvalues
 
 
 sys.path.append('..')
-from get_full_table import METADATA_COLUMNS, MODELS
+from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS
 
 
 system_name = 's669_ddg_experimental'
@@ -20,11 +20,14 @@ for curr_comp in ['per structure', 'overall']:
 
     num_measurements_trace = []
 
-    for hcnn_model in MODELS:
+    for model in HCNN_MODELS + PROTEINMPNN_MODELS:
 
-        # load json file with correlations
-        with open(f'{hcnn_model}/zero_shot_predictions/{system_name}-{hcnn_model}-use_mt_structure=0_correlations.json', 'r') as f:
-            correlations = json.load(f)
+        if model in HCNN_MODELS:
+            with open(f'{model}/zero_shot_predictions/{system_name}-{model}-use_mt_structure=0_correlations.json', 'r') as f:
+                correlations = json.load(f)
+        elif model in PROTEINMPNN_MODELS:
+            with open(f'{model}/zero_shot_predictions/{system_name}-num_seq_per_target=10-use_mt_structure=0_correlations.json', 'r') as f:
+                correlations = json.load(f)
         
         if curr_comp == 'per structure':
             pr_trace, pr_pval_trace, sr_trace, sr_pval_trace, num_trace = [], [], [], [], []
@@ -51,10 +54,10 @@ for curr_comp in ['per structure', 'overall']:
 
         num_measurements_trace.append(num_measurements)
 
-        correlations_values_in_table[hcnn_model + ' - Pearsonr'] = pr
-        correlations_values_in_table[hcnn_model + ' - Pearsonr p-value'] = pr_pval
-        correlations_values_in_table[hcnn_model + ' - Spearmanr'] = sr
-        correlations_values_in_table[hcnn_model + ' - Spearmanr p-value'] = sr_pval
+        correlations_values_in_table[model + ' - Pearsonr'] = pr
+        correlations_values_in_table[model + ' - Pearsonr p-value'] = pr_pval
+        correlations_values_in_table[model + ' - Spearmanr'] = sr
+        correlations_values_in_table[model + ' - Spearmanr p-value'] = sr_pval
 
     if len(set(num_measurements_trace)) > 1:
         print('WARNING: Number of measurements for each model is not the same')

@@ -1,4 +1,5 @@
 Important Note: Generated colabfold structure using DMS sequence. The PDB structure is shorter than the DMS sequence. The PDB structure and the alpha fold structure are different, because the alphafold structure is for the entire protein and the PDB structure is for the BRCT domain, so they should both work, because domains are structurally independent.
+The AlphaFold structure is suuuuuuuuuuper non-confident, it has the spaghetti dome. Not gonna use it.
 
 Findlay, G.M., Daza, R.M., Martin, B. et al. Accurate classification of BRCA1 variants with saturation genome editing. Nature 562, 217–222 (2018). https://doi.org/10.1038/s41586-018-0461-z
 The paper studies two domains of the BRCA1 protein, this directory focuses on the BRCT domain. The paper mentions the 1T29 PDB id as the source for an image, but the paper does not otherwise mention the peptide present in that structure.

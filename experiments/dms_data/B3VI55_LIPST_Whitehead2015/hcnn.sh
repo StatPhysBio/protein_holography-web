@@ -1,13 +1,15 @@
 
 
 # model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50 HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50 HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50 '
-model_version_list='HCNN_biopython_proteinnet_0p00' # HCNN_biopython_proteinnet_0p50 HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50 HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50'
+model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50 HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50 HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50'
 # model_version_list='HCNN_biopython_pisces30_0p00 HCNN_biopython_pisces30_0p50 HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
 pdb_dir='./pdbs/'
 
 base_dir='./'
 
-systems='output_B3VI55_LIPST_Whitehead2015__4zlu' # output_B3VI55_LIPST_Whitehead2015__AF-B3VI55-F1-model_v4'
+systems='output_B3VI55_LIPST_Whitehead2015__4zlu output_B3VI55_LIPST_Whitehead2015__AF-B3VI55-F1-model_v4'
+
+dms_columns='SelectionOne'
 
 for system in $systems
     do
@@ -23,7 +25,14 @@ for system in $systems
                             --mutant_column mutant \
                             --mutant_chain_column chain \
                             --use_mt_structure 0 \
-                            --dms_column SelectionOne
+                            --dms_column $dms_columns
+
+
+        python -u ../correlations.py \
+                        --model_version $model_version \
+                        --use_mt_structure 0 \
+                        --system_name $system \
+                        --dms_column $dms_columns
     
     done
 done

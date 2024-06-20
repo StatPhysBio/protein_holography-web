@@ -9,6 +9,8 @@ base_dir='./'
 
 systems='output_AMIE_PSEAE_Whitehead__2uxy output_AMIE_PSEAE_Whitehead__AF-P11436-F1-model_v4'
 
+dms_columns='acetamide_normalized_fitness isobutyramide_normalized_fitness propionamide_normalized_fitness'
+
 for system in $systems
     do
     for model_version in $model_version_list
@@ -23,7 +25,14 @@ for system in $systems
                             --mutant_column mutant \
                             --mutant_chain_column chain \
                             --use_mt_structure 0 \
-                            --dms_column acetamide_normalized_fitness
+                            --dms_column $dms_columns
+
+
+        python -u ../correlations.py \
+                        --model_version $model_version \
+                        --use_mt_structure 0 \
+                        --system_name $system \
+                        --dms_column $dms_columns
     
     done
 done
