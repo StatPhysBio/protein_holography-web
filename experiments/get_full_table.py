@@ -13,7 +13,7 @@ HCNN_MODELS_BASE = ['HCNN_biopython_proteinnet',
 
 HCNN_NOISE_LEVELS = ['_0p00', '_0p50']
 
-HCNN_MODELS = [model + noise_level for model in HCNN_MODELS_BASE for noise_level in HCNN_NOISE_LEVELS]
+# HCNN_MODELS = [model + noise_level for model in HCNN_MODELS_BASE for noise_level in HCNN_NOISE_LEVELS]
 
 HCNN_MODEL_TO_PRETTY_NAME = {
     'HCNN_biopython_proteinnet_0p00': r'HCNN Biopython no ligands 0.00 $\AA$',
@@ -21,8 +21,17 @@ HCNN_MODEL_TO_PRETTY_NAME = {
     'HCNN_biopython_proteinnet_extra_mols_0p00': r'HCNN Biopython 0.00 $\AA$',
     'HCNN_biopython_proteinnet_extra_mols_0p50': r'HCNN Biopython 0.50 $\AA$',
     'HCNN_pyrosetta_proteinnet_extra_mols_0p00': r'HCNN Pyrosetta 0.00 $\AA$',
-    'HCNN_pyrosetta_proteinnet_extra_mols_0p50': r'HCNN Pyrosetta 0.50 $\AA$'
+    'HCNN_pyrosetta_proteinnet_extra_mols_0p50': r'HCNN Pyrosetta 0.50 $\AA$',
+
+    'HCNN_biopython_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_all': 'HCNN Biopython 0.00 $\AA$ \n+ Rosetta ddG All Layers at 0.00 $\AA$',
+    'HCNN_biopython_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_invariant_mlp': 'HCNN Biopython 0.00 $\AA$ \n+ Rosetta ddG Invariant MLP at 0.00 $\AA$',
+    'HCNN_biopython_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p00_all': 'HCNN Biopython 0.50 $\AA$ \n+ Rosetta ddG All Layers at 0.00 $\AA$',
+    'HCNN_biopython_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p50_all': 'HCNN Biopython 0.50 $\AA$ \n+ Rosetta ddG All Layers at 0.50 $\AA$',
+    'HCNN_pyrosetta_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_all': 'HCNN Pyrosetta 0.00 $\AA$ \n+ Rosetta ddG All Layers at 0.00 $\AA$',
+    'HCNN_pyrosetta_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p00_all': 'HCNN Pyrosetta 0.50 $\AA$ \n+ Rosetta ddG All Layers at 0.00 $\AA$',
+    'HCNN_pyrosetta_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p50_all': 'HCNN Pyrosetta 0.50 $\AA$ \n+ Rosetta ddG All Layers at 0.50 $\AA$',
 }
+HCNN_MODELS = list(HCNN_MODEL_TO_PRETTY_NAME.keys())
 
 PROTEINMPNN_MODELS = ['proteinmpnn_v_48_002',
                       'proteinmpnn_v_48_020',
@@ -45,6 +54,7 @@ if __name__ == '__main__':
 
     # make the tables
     os.system('cd Protein_G && python make_results_table.py && cd ..')
+    os.system('cd VAMP && python make_results_table.py && cd ..')
     os.system('cd ProTherm/targets && python make_results_table.py && cd ../..')
     os.system('cd S669 && python make_results_table.py && cd ..')
     os.system('cd Ssym && python make_results_table.py && cd ..')
@@ -54,6 +64,7 @@ if __name__ == '__main__':
 
     # combine the tables
     table_files = ['Protein_G/protein_g_ddg_experimental-results_table.csv',
+                    'VAMP/vamp_ddg_experimental-results_table.csv',
                     'ProTherm/targets/protherm_targets_ddg_experimental-results_table.csv',
                     'S669/s669_ddg_experimental-results_table.csv',
                     'Ssym/Ssym_dir/ssym_dir_ddg_experimental-results_table.csv',

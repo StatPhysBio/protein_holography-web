@@ -1,20 +1,31 @@
 #!/bin/bash
 #SBATCH --job-name=skempi
-#SBATCH --account=spe
-#SBATCH --partition=compute
+#SBATCH --account=stf
+#SBATCH --partition=cpu-g2-mem2x
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=23:00:00
-#SBATCH --mem=32G
+#SBATCH --mem=64G
 #SBATCH --export=all
 #SBATCH -e hcnn_skempi.err
 #SBATCH -o hcnn_skempi.log
 
-model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50'
+# model_version_list='HCNN_biopython_proteinnet_0p00 HCNN_biopython_proteinnet_0p50'
 # model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00 HCNN_biopython_proteinnet_extra_mols_0p50'
 # model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p00 HCNN_pyrosetta_proteinnet_extra_mols_0p50'
 # model_version_list='HCNN_biopython_pisces30_0p00 HCNN_biopython_pisces30_0p50'
 # model_version_list='HCNN_biopython_pisces90_0p00 HCNN_biopython_pisces90_0p50'
+
+# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_all'
+# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_invariant_mlp'
+# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p00_all'
+# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_all HCNN_biopython_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_invariant_mlp HCNN_biopython_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p00_all'
+# model_version_list='HCNN_biopython_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p50_all'
+# model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_all'
+# model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p00_all'
+model_version_list='HCNN_pyrosetta_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p50_all'
+
+
 use_mt_structure='0'
 
 base_dir='./'

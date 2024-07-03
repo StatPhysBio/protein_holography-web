@@ -6,17 +6,7 @@ from tqdm import tqdm
 from glob import glob
 from scipy.stats import spearmanr, pearsonr
 
-
-HCNN_MODELS = ['HCNN_biopython_proteinnet_0p00',
-               'HCNN_biopython_proteinnet_0p50',
-               'HCNN_biopython_proteinnet_extra_mols_0p00',
-               'HCNN_biopython_proteinnet_extra_mols_0p50',
-               'HCNN_pyrosetta_proteinnet_extra_mols_0p00',
-               'HCNN_pyrosetta_proteinnet_extra_mols_0p50']
-
-PROTEINMPNN_MODELS = ['proteinmpnn_v_48_002',
-                      'proteinmpnn_v_48_020',
-                      'proteinmpnn_v_48_030']
+from plots import HCNN_MODELS, PROTEINMPNN_MODELS
 
 if __name__ == '__main__':
 

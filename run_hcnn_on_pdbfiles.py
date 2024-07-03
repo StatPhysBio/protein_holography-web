@@ -185,7 +185,14 @@ if __name__ == '__main__':
             pdb_files_and_chains = zip(pdb_files, chains)
 
         for pdbfile, chain in pdb_files_and_chains:
-            inference = predict_from_pdbfile(pdbfile, models, hparams, args.batch_size, chain=chain)
+            if args.verbose: print(f'Running inference on pdb file: {pdbfile}')
+
+            try:
+                inference = predict_from_pdbfile(pdbfile, models, hparams, args.batch_size, chain=chain)
+            except Exception as e:
+                print(f'Error running inference on pdb file: {pdbfile}')
+                print(f'Error message: {e}')
+                continue
 
             if len(inference['best_indices'].shape) == 2:
                 if args.verbose: print('Accuracy of first model in ensemble: %.3f' % accuracy_score(inference['targets'], inference['best_indices'][0, :]))

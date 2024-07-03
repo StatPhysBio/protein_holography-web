@@ -21,8 +21,8 @@ SYSTEMS = [d for d in os.listdir() if os.path.isdir(d) and not d.startswith("__"
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-A',  '--account', type=str, default='stf')
-    parser.add_argument('-P',  '--partition', type=str, default='gpu-2080ti')
-    parser.add_argument('-G',  '--use_gpu', type=int, default=1, choices=[0, 1])
+    parser.add_argument('-P',  '--partition', type=str, default='cpu-g2-mem2x')
+    parser.add_argument('-G',  '--use_gpu', type=int, default=0, choices=[0, 1])
     parser.add_argument('-C',  '--num_cores', type=int, default=1)
     parser.add_argument('-W',  '--walltime', type=str, default='23:00:00')
     parser.add_argument('-M',  '--memory', type=str, default='44G')

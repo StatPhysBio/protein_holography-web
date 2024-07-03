@@ -27,7 +27,7 @@ conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c 
 
 **Step 2:** Install `zernikegrams` package, which we use for protein preprocessing.
 ```bash
-conda install zernikegrams -c william-galvin -c conda-forge
+conda install zernikegrams -c statphysbio -c conda-forge
 ```
 TD;DR: if you are experiencing issues with the installation and you have `pytorch` with CUDA installed, install `pytorch` with CPU only.
 Installing `zernikegrams` will also install other necessary packages such as `openmm`. As outlined above, in our environment we are experiencing a conflict between `openmm` and `pytorch` that we are currently working on resolving, and cannot guarantee GPU support at this time (though it works without issues on colab). \\

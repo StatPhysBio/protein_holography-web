@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 
-sys.path.append('..')
+sys.path.append('../..')
 from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS
 
 

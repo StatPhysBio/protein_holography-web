@@ -8,7 +8,7 @@ pdb_dir='/gscratch/spe/gvisan01/tcr_pmhc/pdbs/ATLAS/'
 
 model_version_list='v_48_002' # 'v_48_030 v_48_020 v_48_002'
 
-use_mt_structure_list='1' #'0 1'
+use_mt_structure_list='0' #'0 1'
 
 for model_version in $model_version_list
     do

@@ -254,7 +254,7 @@ if __name__ == '__main__':
                 CHUNK_SIZE = 20
                 resnums_chunks = [resnums[i:i+CHUNK_SIZE] for i in range(0, len(resnums), CHUNK_SIZE)]
                 for res_chunk in resnums_chunks:
-                    print(f'Running inference for {pdb} {chain} {res_chunk}')
+                    # print(f'Running inference for {pdb} {chain} {res_chunk}')
                     make_prediction(inference_dir, args.folder_with_pdbs, chain, pdb, res_chunk, args.model_version, models, hparams, args.ensemble_at_logits_level)
     end = time()
     print(f'Inference took {end - start} seconds')

@@ -14,7 +14,7 @@
     "get_physicochemical_info_for_hydrogens": true,
     "rst_normalization": "square",
     "charges": "amber99sb",
-    "noise": 0,
+    "noise": 0.5,
     "noise_seed": 7,
     "relaxation": "None",
     "relaxation_num": 0,
