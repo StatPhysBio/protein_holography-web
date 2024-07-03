@@ -14,5 +14,5 @@ training_data/pretraining/
 training_data/finetuning/rosetta_ddg/premade_zernikegrams/
 experiments/hsiue_et_al/
 experiments/luksza_et_al/
-*/.DS_store
-*/raw_df_from_esm.csv
+*.DS_store
+*raw_df_from_esm.csv
