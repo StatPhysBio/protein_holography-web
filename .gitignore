@@ -3,14 +3,15 @@
 *.pkl
 *.gz
 *.log
+*.out
 *.err
 *.jsonl
 TODO.md
 __pycache__/
 .pytest_cache/
-protein_holography_web/protein_processing/reduce/
 zernikegrams/
-training_data/
+training_data/pretraining/
+training_data/finetuning/rosetta_ddg/premade_zernikegrams/
 experiments/hsiue_et_al/
 experiments/luksza_et_al/
 */.DS_store
