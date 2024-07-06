@@ -6,7 +6,7 @@ import pandas as pd
 
 
 sys.path.append('../..')
-from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS
+from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS, ESM_MODELS
 
 
 system_name = 'protherm_targets_ddg_experimental'
@@ -20,28 +20,34 @@ for protein_name, pdbid in zip(['Myoglobin', 'Lysozyme', 'Chymotrypsin inhib.', 
 
     num_measurements_trace = []
 
-    for model in HCNN_MODELS + PROTEINMPNN_MODELS:
+    for model in HCNN_MODELS + PROTEINMPNN_MODELS + ESM_MODELS:
 
-        if model in HCNN_MODELS:
-            with open(f'{model}/zero_shot_predictions/{system_name}-{model}-use_mt_structure=0_correlations.json', 'r') as f:
-                correlations = json.load(f)
-        elif model in PROTEINMPNN_MODELS:
-            with open(f'{model}/zero_shot_predictions/{system_name}-num_seq_per_target=10-use_mt_structure=0_correlations.json', 'r') as f:
-                correlations = json.load(f)
-        
-        pr = -correlations[pdbid]['pearson'][0] # flip correlation so higher is better
-        pr_pval = correlations[pdbid]['pearson'][1]
+        try:
+            if model in HCNN_MODELS + ESM_MODELS:
+                with open(f'{model}/zero_shot_predictions/{system_name}-{model}-use_mt_structure=0_correlations.json', 'r') as f:
+                    correlations = json.load(f)
+            elif model in PROTEINMPNN_MODELS:
+                with open(f'{model}/zero_shot_predictions/{system_name}-num_seq_per_target=10-use_mt_structure=0_correlations.json', 'r') as f:
+                    correlations = json.load(f)
+            
+            pr = -correlations[pdbid]['pearson'][0] # flip correlation so higher is better
+            pr_pval = correlations[pdbid]['pearson'][1]
 
-        sr = -correlations[pdbid]['spearman'][0] # flip correlation so higher is better
-        sr_pval = correlations[pdbid]['spearman'][1]
+            sr = -correlations[pdbid]['spearman'][0] # flip correlation so higher is better
+            sr_pval = correlations[pdbid]['spearman'][1]
 
-        num_measurements = correlations[pdbid]['count']
-        num_measurements_trace.append(num_measurements)
+            num_measurements = correlations[pdbid]['count']
+            num_measurements_trace.append(num_measurements)
 
-        correlations_values_in_table[model + ' - Pearsonr'] = pr
-        correlations_values_in_table[model + ' - Pearsonr p-value'] = pr_pval
-        correlations_values_in_table[model + ' - Spearmanr'] = sr
-        correlations_values_in_table[model + ' - Spearmanr p-value'] = sr_pval
+            correlations_values_in_table[model + ' - Pearsonr'] = pr
+            correlations_values_in_table[model + ' - Pearsonr p-value'] = pr_pval
+            correlations_values_in_table[model + ' - Spearmanr'] = sr
+            correlations_values_in_table[model + ' - Spearmanr p-value'] = sr_pval
+        except:
+            correlations_values_in_table[model + ' - Pearsonr'] = np.nan
+            correlations_values_in_table[model + ' Pearsonr p-value'] = np.nan
+            correlations_values_in_table[model + ' Spearmanr'] = np.nan
+            correlations_values_in_table[model + ' Spearmanr p-value'] = np.nan
 
     if len(set(num_measurements_trace)) > 1:
         print('WARNING: Number of measurements for each model is not the same')

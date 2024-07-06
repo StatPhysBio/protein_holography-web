@@ -51,6 +51,13 @@ for curr_comp_in_json, curr_comp in zip(['Per-Structure', 'Overall'],
             correlations_values_in_table[model + ' - Spearmanr'] = sr
             correlations_values_in_table[model + ' - Spearmanr p-value'] = sr_pval
 
+            if curr_comp_in_json == 'Per-Structure':
+                correlations_values_in_table[model + ' - Pearsonr std error'] = correlations[curr_comp_in_json][mut_types]['Pr_std'] / np.sqrt(correlations[curr_comp_in_json][mut_types]['num_struc'])
+                correlations_values_in_table[model + ' - Spearmanr std error'] = correlations[curr_comp_in_json][mut_types]['Sr_std'] / np.sqrt(correlations[curr_comp_in_json][mut_types]['num_struc'])
+            else:
+                correlations_values_in_table[model + ' - Pearsonr std error'] = np.nan
+                correlations_values_in_table[model + ' - Spearmanr std error'] = np.nan
+
         if len(set(num_measurements_trace)) > 1:
             print('WARNING: Number of measurements for each model is not the same')
             print(num_measurements_trace)

@@ -6,7 +6,7 @@ import pandas as pd
 
 
 sys.path.append('..')
-from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS
+from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS, ESM_MODELS
 
 
 system_name = 'protein_g_ddg_experimental'
@@ -15,9 +15,9 @@ correlations_values_in_table = {}
 
 num_measurements_trace = []
 
-for model in HCNN_MODELS + PROTEINMPNN_MODELS:
+for model in HCNN_MODELS + PROTEINMPNN_MODELS + ESM_MODELS:
 
-    if model in HCNN_MODELS:
+    if model in HCNN_MODELS + ESM_MODELS:
         with open(f'{model}/zero_shot_predictions/{system_name}-{model}-use_mt_structure=0_correlations.json', 'r') as f:
             correlations = json.load(f)
     elif model in PROTEINMPNN_MODELS:

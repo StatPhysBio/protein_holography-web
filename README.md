@@ -1,15 +1,14 @@
-# protein_holography-web
+# HERMES: Holographic Equivariant neuRal network model for Mutational Effect and Stability prediction
+
+![Schematic of HERMES](hermes.pdf)
 
 
-## Usage
-
-
-### Running on Colab
+## Running on Colab
 
 You can run predictions easily on the [Google Colab Notebook](https://colab.research.google.com/drive/1JQxkXeGZJYYcPNglN3rYUYiOuUOkwJPL).
 
 
-### Installing and running locally
+## Installing and running locally
 
 NOTE: Currently, there is a conflict between `openmm` and `pytorch`, whereby it's challenging to install both with CUDA support. We are currently struggling to replicate the installation on our local HPC cluster - which we once managed to do (sigh...). Install `pytorch` with CPU support only, however, gives no issues. Try installing `pytorch` with CUDA first, and if that doesn't work, install it with CPU only. We are working on a foolproof solution - if you have any leads please let us know by posting an Issue.
 
@@ -54,21 +53,29 @@ Installation tips:
 
 
 
-### Models
+## Provided pre-trained and fine-tuned models
+
+We are in the process of re-naming models in the repository. For now, please **use the old names**.\\
+[new name] <--> [old name]
 
 We provide the following pre-trained models:
-- `HCNN_biopython_proteinnet_0p00`: trained on ~10k CASP12 ProteinNet chains, using the preprocessing pipeline from the RaSP paper based on Biopython.
-- `HCNN_biopython_proteinnet_extra_mols_0p00`: trained on ~10k CASP12 ProteinNet chains, using the preprocessing pipeline from the RaSP paper based on Biopython, *except we keep extra ligands and ions (not water)*.
-- `HCNN_pyrosetta_proteinnet_extra_mols_0p00`: trained on ~10k CASP12 ProteinNet chains, using *pyrosetta* to preprocess protein structures as described in the HCNN paper. This procedure includes ligands and ions, excludes water, and - constrary to RaSP - does **not** substitute non-canonical amino-acids.
+- `HERMES_Bp_000` <--> `HCNN_biopython_proteinnet_extra_mols_0p00`: trained on ~10k CASP12 ProteinNet chains, using the preprocessing pipeline from the RaSP paper based on Biopython, *except we keep extra ligands and ions (not water)*.
+- `HERMES_Bp_050` <--> `HCNN_biopython_proteinnet_extra_mols_0p50`: same as above, but trained on data with added gaussian noise with standard deviation of 0.5 Angstrom.
+- `HERMES_Py_000` <--> `HCNN_pyrosetta_proteinnet_extra_mols_0p00`: trained on ~10k CASP12 ProteinNet chains, using *pyrosetta* to preprocess protein structures as described in the HCNN paper. This procedure includes ligands and ions, excludes water, and - constrary to RaSP - does **not** substitute non-canonical amino-acids.
+- `HERMES_Py_050` <--> `HCNN_pyrosetta_proteinnet_extra_mols_0p50`: same as above, but trained on data with added gaussian noise with standard deviation of 0.5 Angstrom.
 
-We also provide models trained on the same data, except adding gaussian noise with standard deviation of 0.5 Angstrom to the coordinates. To use these mdoels, just replace `_0p00` with `_0p50` in the model name.
+We also provide the same models fine-tuned on stability ddG values computed with Rosetta:
+- `HERMES_Bp_000_FT_Ros_ddG` <--> `HCNN_biopython_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_all`
+- `HERMES_Bp_050_FT_Ros_ddG` <--> `HCNN_biopython_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p50_all`
+- `HERMES_Py_000_FT_Ros_ddG` <--> `HCNN_pyrosetta_proteinnet_extra_mols_0p00_finetuned_with_rosetta_ddg_all`
+- `HERMES_Py_050_FT_Ros_ddG` <--> `HCNN_pyrosetta_proteinnet_extra_mols_0p50_finetuned_with_rosetta_ddg_with_0p50_all`
 
-The relative performance of the models on zero-shot pediction of stability, binding, and immune activity measurements can be found below under **Benchmarking results**.
+Please see the paper for a comprehensive benchmarking evaluation. The tl;dr is: fine-tuned models work better, and all four perform similarly. Pre-trained-only models work better with 0.50 Angstrom noise, and with pyrosetta preprocedding.
 
 Note that, to use the pyrosetta models, a local installation of pyrosetta is necessary.
 
 
-### Getting site-level mutation probabilities and embeddings for all sites in PDB files
+## Getting site-level mutation probabilities and embeddings for all sites in PDB files
 
 The script `run_hcnn_on_pdbfiles.py` can be given as input a set of PDB files - with optionally pdb-specific chains - and it will output a csv file where every row is a uniquely-identified site, and columns are the site's mutation probabilities. If embeddings are requested, they will be outputted in a separate file called `{CSV_FILENAME}-embeddings.npy`.
 
@@ -98,7 +105,7 @@ python run_hcnn_on_pdbfiles.py -pd pdbs -pn my_pdbs_and_chains.txt --m HCNN_biop
 Please run `python run_hcnn_on_pdbfiles.py -h` for more information.
 
 
-### Scoring specific mutations
+## Scoring specific mutations
 
 Sometimes, it is useful to score specific mutations. The script `zero_shot_mutation_effect_prediction_with_hcnn.py` can be used for this purpose. It takes as input a csv file with columns corresponding to: the mutation, the chain, and the pdb file of the wildtype. The script will output a csv file with the mutation probabilities and embeddings for the requested mutations.
 
@@ -109,9 +116,23 @@ The columns are not expected to have specific names, but the names must ben prov
 Run `python zero_shot_mutation_effect_prediction_with_hcnn.py -h` for more information on the script, and see `experiments/Protein_G/` for a simple example.
 
 
-## Benchmarking results
+## Want to fine-tune on your mutation effect dataset?
 
-See `experiments/full_results_table.csv` for a comprehensive list of results.
+Fine-tuning can be easily done in three steps.
+
+1. **Prepare the data.** Prepare the targets in three .csv files, which must have `{train}`, `{valid}`, and `{test}` in the name. Each .csv file must have the following columns: `[pdbid, chainid, variant, score]`. Also, place all the pdbfiles for training, validation and testing in a single directory.
+
+2. **Generate inputs (aka zernikegrams or holograms).** For faster training, we pre-generate the inputs and store them in a .npz file. Run `make_zernikegrams_for_finetuning.py` to generate the inputs, providing as arguments, the model you want to make inputs for, the directory of pdbfiles, whether to add noise to structures, and the output directory.
+
+3. **Fine-tune the model.** Run `finetune_hcnn.py` to fine-tune the model. You need to provide a config file with the necessary information, see `/training_data/finetuning/rosetta_ddg/configs/HCNN_biopython_proteinnet_extra_mols_0p00__all.yaml` for a thorough example.
+
+
+
+
+
+
+
+
 
 
 

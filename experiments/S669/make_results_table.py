@@ -7,7 +7,7 @@ from scipy.stats import combine_pvalues
 
 
 sys.path.append('..')
-from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS
+from get_full_table import METADATA_COLUMNS, HCNN_MODELS, PROTEINMPNN_MODELS, ESM_MODELS
 
 
 system_name = 's669_ddg_experimental'
@@ -20,9 +20,9 @@ for curr_comp in ['per structure', 'overall']:
 
     num_measurements_trace = []
 
-    for model in HCNN_MODELS + PROTEINMPNN_MODELS:
+    for model in HCNN_MODELS + PROTEINMPNN_MODELS + ESM_MODELS:
 
-        if model in HCNN_MODELS:
+        if model in HCNN_MODELS + ESM_MODELS:
             with open(f'{model}/zero_shot_predictions/{system_name}-{model}-use_mt_structure=0_correlations.json', 'r') as f:
                 correlations = json.load(f)
         elif model in PROTEINMPNN_MODELS:
@@ -39,15 +39,19 @@ for curr_comp in ['per structure', 'overall']:
                     sr_pval_trace.append(correlations[struct]['spearman'][1])
                     num_trace.append(correlations[struct]['count'])
             pr = np.mean(pr_trace)
+            pr_std_error = np.std(pr_trace) / np.sqrt(len(num_trace))
             pr_pval = combine_pvalues(pr_pval_trace, method='fisher')[1]
             sr = np.mean(sr_trace)
+            sr_std_error = np.std(sr_trace) / np.sqrt(len(num_trace))
             sr_pval = combine_pvalues(sr_pval_trace, method='fisher')[1]
             num_measurements = np.sum(num_trace)
             num_structures = len(num_trace)
         else:
             pr = -correlations['overall']['pearson'][0] # flip correlation so higher is better
+            pr_std_error = np.nan
             pr_pval = correlations['overall']['pearson'][1] # flip correlation so higher is better
             sr = -correlations['overall']['spearman'][0]
+            sr_std_error = np.nan
             sr_pval = correlations['overall']['spearman'][1]
             num_measurements = correlations['overall']['count']
             num_structures = 94
@@ -55,8 +59,10 @@ for curr_comp in ['per structure', 'overall']:
         num_measurements_trace.append(num_measurements)
 
         correlations_values_in_table[model + ' - Pearsonr'] = pr
+        correlations_values_in_table[model + ' - Pearsonr std error'] = pr_std_error
         correlations_values_in_table[model + ' - Pearsonr p-value'] = pr_pval
         correlations_values_in_table[model + ' - Spearmanr'] = sr
+        correlations_values_in_table[model + ' - Spearmanr std error'] = sr_std_error
         correlations_values_in_table[model + ' - Spearmanr p-value'] = sr_pval
 
     if len(set(num_measurements_trace)) > 1:

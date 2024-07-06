@@ -33,9 +33,6 @@ HCNN_MODEL_TO_PRETTY_NAME = {
 }
 HCNN_MODELS = list(HCNN_MODEL_TO_PRETTY_NAME.keys())
 
-PROTEINMPNN_MODELS = ['proteinmpnn_v_48_002',
-                      'proteinmpnn_v_48_020',
-                      'proteinmpnn_v_48_030']
 
 PROTEINMPNN_MODEL_TO_PRETTY_NAME = {
     'proteinmpnn_v_48_002': r'ProteinMPNN 0.02 $\AA$',
@@ -43,9 +40,20 @@ PROTEINMPNN_MODEL_TO_PRETTY_NAME = {
     'proteinmpnn_v_48_030': r'ProteinMPNN 0.30 $\AA$'
 }
 
+PROTEINMPNN_MODELS = list(PROTEINMPNN_MODEL_TO_PRETTY_NAME.keys())
+
+ESM_MODEL_TO_PRETTY_NAME = {
+    'esm_1v_masked_marginals': 'ESM-1v Masked Marginals',
+    'esm_1v_wt_marginals': 'ESM-1v Wildtype Marginals'
+}
+
+ESM_MODELS = list(ESM_MODEL_TO_PRETTY_NAME.keys())
+
+
 MODEL_TO_PRETTY_NAME = {
     **HCNN_MODEL_TO_PRETTY_NAME,
     **PROTEINMPNN_MODEL_TO_PRETTY_NAME,
+    **ESM_MODEL_TO_PRETTY_NAME,
     'ESM-1v (zero shot)': 'ESM-1v (zero shot)'
 }
 
@@ -76,16 +84,6 @@ if __name__ == '__main__':
     dfs = [pd.read_csv(f) for f in table_files]
 
     df = pd.concat(dfs, ignore_index=True)
-
-    # rearrange columns
-    rearranged_columns = ['dataset', 'use MT structures', 'is single-point', 'is multi-point', 'correlation computation']
-    rearranged_columns += [f'{model} - Pearsonr' for model in HCNN_MODELS + PROTEINMPNN_MODELS]
-    rearranged_columns += [f'{model} - Spearmanr' for model in HCNN_MODELS + PROTEINMPNN_MODELS]
-    rearranged_columns += [f'{model} - Pearsonr p-value' for model in HCNN_MODELS + PROTEINMPNN_MODELS]
-    rearranged_columns += [f'{model} - Spearmanr p-value' for model in HCNN_MODELS + PROTEINMPNN_MODELS]
-    rearranged_columns += ['measurement type', 'num measurements', 'num structures']
-
-    df = df[rearranged_columns]
 
     df.to_csv('full_results_table.csv', index=False)
 

@@ -382,39 +382,6 @@ def finetune_single_model(input_model_dir: str,
             f.write(f'{pdbid}\t{pr:.3f}\t{sr:.3f}\n')
 
 
-'''
-
-Currently, the model gets okay at ddg regression but it seems to totally forget the original task of classifying the amino acids (it gets to CE loss of 2.4 which is basically random).
-
-Ideas to make the model retain both:
-1. Somehow force initial model logits to be in the range of the scores (take mean and stddev from training data)
-    - This could be done by manually rescaling the matrix of the last linear layer of the model (to rescale mean), and then adding an additional bias term to the last linear layer bias (to rescale stddev).
-    - Why should it work? This way, the initial gradients of the model won't be such that it will easily forget the original tesk.
-    - NOTE: rescaling the weight matrix has a super descructive result on the classification predictons! Shifting the bias does not change the classification predictions, but it does nothing
-      to the regression since the regression is done on the difference of the logits, so it is shift-invariant!
-
-1.5 Same idea as above, but only rescale in the loss function.
-
-
-2. Only fine-tune the last linear layer of the model
-    - This would effectively only learn a linear model on top of the original predictions. Limited in representation strength, but less likely to change predictions on the original task much.
-    - RESULT: does not seem to change much over fine-tuning the whole head when alpha_cls = 0.9
-
-3. Devise an appropriate schedule for `alpha_cls` to make sure the model does not forget the original task
-
-
-
-However, perhaps we DO NOT need the model to retain the classification task. Let me try training one such model first and see how it does.
-- In this regime, fine-tuning the whole model overfits a lot
-- RESULT: indeed results are positive on this front!
-
-TODO:
-1. Try version with noise, in two ways: (1) the unnoised data, because afterall that's how structures will be seen (at least for now)
-    and (2) with noised data, but different noise seeds for each model, like for training data (this will be a little messier, change data-loading code a little)
-
-'''
-
-
 
 
 

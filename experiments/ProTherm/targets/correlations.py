@@ -18,6 +18,9 @@ if __name__ == '__main__':
     if 'proteinmpnn' in args.model_version:
         model_version_in_filename = 'num_seq_per_target=10'
         pred_column = 'log_p_mt__minus__log_p_wt'
+    elif 'esm' in args.model_version:
+        model_version_in_filename = args.model_version
+        pred_column = 'avg_pred_ddg'
     else:
         model_version_in_filename = args.model_version
         pred_column = 'log_proba_mt__minus__log_proba_wt'
