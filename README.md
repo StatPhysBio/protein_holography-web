@@ -1,6 +1,6 @@
 # HERMES: Holographic Equivariant neuRal network model for Mutational Effect and Stability prediction
 
-![Schematic of HERMES](hermes.pdf)
+![Schematic of HERMES](hermes.png)
 
 
 ## Running on Colab
