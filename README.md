@@ -1,5 +1,7 @@
 # HERMES: Holographic Equivariant neuRal network model for Mutational Effect and Stability prediction
 
+Code for the paper [HERMES: Holographic Equivariant neuRal network model for Mutational Effect and Stability prediction](https://www.biorxiv.org/content/10.1101/2024.07.09.602403v1.full).
+
 ![Schematic of HERMES](hermes.png)
 
 
@@ -201,6 +203,23 @@ Fine-tuning can be easily done in three steps.
 
 
 
+## References
+
+If you use this code, please cite the following paper:
+
+```
+@article {visani_hermes_2024,
+	author = {Visani, Gian Marco and Pun, Michael N. and Galvin, William and Daniel, Eric and Borisiak, Kevin and Wagura, Utheri and Nourmohammad, Armita},
+	title = {HERMES: Holographic Equivariant neuRal network model for Mutational Effect and Stability prediction},
+	elocation-id = {2024.07.09.602403},
+	year = {2024},
+	doi = {10.1101/2024.07.09.602403},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2024/07/13/2024.07.09.602403},
+	eprint = {https://www.biorxiv.org/content/early/2024/07/13/2024.07.09.602403.full.pdf},
+	journal = {bioRxiv}
+}
+```
 
 
 
