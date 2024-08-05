@@ -10,6 +10,12 @@ import torch
 
 from typing import *
 
+from zernikegrams.preprocessors.pdbs import PDBPreprocessor
+import h5py
+import hdf5plugin
+import tempfile
+from rich.progress import Progress
+
 from protein_holography_web.cg_coefficients import get_w3j_coefficients
 from protein_holography_web.models import SO3_ConvNet, CGNet
 
@@ -17,6 +23,30 @@ from protein_holography_web.models import SO3_ConvNet, CGNet
 from zernikegrams import get_zernikegrams_from_pdbfile
 from protein_holography_web.utils.data import ZernikegramsDataset
 from protein_holography_web.utils.protein_naming import ol_to_ind_size, ind_to_ol_size
+
+
+def get_num_components(Lmax, ks, keep_zeros, mode, channels):
+    num_components = 0
+    if mode == "ns":
+        for l in range(Lmax + 1):
+            if keep_zeros:
+                num_components += (
+                    np.count_nonzero(np.array(ks) >= l) * len(channels) * (2 * l + 1)
+                )
+            else:
+                num_components += (
+                    np.count_nonzero(
+                        np.logical_and(np.array(ks) >= l, (np.array(ks) - l) % 2 == 0)
+                    )
+                    * len(channels)
+                    * (2 * l + 1)
+                )
+
+    if mode == "ks":
+        for l in range(Lmax + 1):
+            num_components += len(ks) * len(channels) * (2 * l + 1)
+    
+    return num_components
 
 
 def get_channels(channels_str):
@@ -109,14 +139,154 @@ def load_hcnn_models(model_dirs: List[str]):
     return models, hparams # assume that all models have the same hparams and same data_irreps
 
 
-def predict_from_hdf5file(*args, **kwargs):
-    raise NotImplementedError
+def get_zernikegrams_in_parallel(folder_with_pdbs: str,
+                                 pdb_files_and_chains: List[Tuple[str, str]],
+                                 hparams: Dict,
+                                 parallelism: int,
+                                 add_same_noise_level_as_training: bool = False):
+    
+    ## prepare arguments of the pipeline
+    channels = get_channels(hparams['channels'])
+
+    get_structural_info_kwargs = {'padded_length': None,
+                                    'parser': hparams['parser'],
+                                    'SASA': 'SASA' in channels,
+                                    'charge': 'charge' in channels,
+                                    'DSSP': False,
+                                    'angles': False,
+                                    'fix': True,
+                                    'hydrogens': 'H' in channels,
+                                    'extra_molecules': hparams['extra_molecules'],
+                                    'multi_struct': 'warn'}
+
+    if add_same_noise_level_as_training:
+        add_noise_kwargs = {'noise': hparams['noise'],
+                            'noise_seed': hparams['noise_seed']}
+    else:
+        add_noise_kwargs = None
+    
+    pdb_list = []
+    pdb_to_chain = {}
+    for pdbpath, chain in list(pdb_files_and_chains):
+        pdb = pdbpath.split('/')[-1][:-4]
+        pdb_list.append(pdb)
+        pdb_to_chain[pdb] = chain
+
+    def get_residues_only_of_requested_chain(np_protein):
+        pdb = np_protein['pdb'].decode()
+        chain = pdb_to_chain[pdb]
+        res_ids = np.unique(np_protein['res_ids'], axis=0)
+        if chain is None: # no specified chain, return all residues
+            return res_ids
+        else:
+            indices = np.where(np.isin(res_ids[:, 2], np.array([chain.encode()])))[0]
+            return res_ids[indices]
+
+    get_neighborhoods_kwargs = {'r_max': hparams['rcut'],
+                                'remove_central_residue': hparams['remove_central_residue'],
+                                'remove_central_sidechain': hparams['remove_central_sidechain'],
+                                'backbone_only': set(hparams['channels']) == set(['CA', 'C', 'O', 'N']),
+                                'get_residues': get_residues_only_of_requested_chain}
+
+    get_zernikegrams_kwargs = {'r_max': hparams['rcut'],
+                                'radial_func_mode': hparams['radial_func_mode'],
+                                'radial_func_max': hparams['radial_func_max'],
+                                'Lmax': hparams['lmax'],
+                                'channels': channels,
+                                'backbone_only': set(hparams['channels']) == set(['CA', 'C', 'O', 'N']),
+                                'request_frame': False,
+                                'get_physicochemical_info_for_hydrogens': hparams['get_physicochemical_info_for_hydrogens'],
+                                'rst_normalization': hparams['rst_normalization']}
+    
+
+    processor = PDBPreprocessor(pdb_list, folder_with_pdbs)
+
+    L = np.max([5, processor.pdb_name_length])
+
+    num_components = get_num_components(hparams['lmax'], np.arange(hparams['radial_func_max'] + 1), False, hparams['radial_func_mode'], channels)
+    dt = np.dtype(
+        [
+            ("res_id", f"S{L}", (6,)),
+            ("zernikegram", "f4", (num_components,)),
+            ("label", "<i4"),
+        ]
+    )
+
+    hdf5_file = tempfile.NamedTemporaryFile(delete=False)
+    hdf5_name = hdf5_file.name
+
+    with h5py.File(hdf5_name, "w") as f:
+        f.create_dataset(
+            'data',
+            shape=(processor.size * 2000,), # assume an average of 2000 atoms per protein to start with, as that is the average single-chain length
+            maxshape=(None,),
+            dtype=dt,
+            chunks=True,
+            compression=hdf5plugin.LZ4(),
+        )
+
+    with Progress() as bar:
+        task = bar.add_task("zernikegrams from multiple pdbs", total=processor.count())
+        with h5py.File(hdf5_name, "r+") as f:
+            n = 0
+            for zgram_data_batch in processor.execute(
+                callback=get_zernikegrams_from_pdbfile,
+                limit=None,
+                params={
+                    'get_structural_info_kwargs': get_structural_info_kwargs,
+                    'get_neighborhoods_kwargs': get_neighborhoods_kwargs,
+                    'get_zernikegrams_kwargs': get_zernikegrams_kwargs,
+                    'add_noise_kwargs': add_noise_kwargs
+                },
+                parallelism=parallelism
+            ):
+                
+                n_added_zgrams = zgram_data_batch['res_id'].shape[0]
+                
+                if n + n_added_zgrams > f["data"].shape[0]:
+                    f["data"].resize((f["data"].shape[0] + n_added_zgrams*3,))
+                
+                for n_i in range(n_added_zgrams):
+                    f["data"][n + n_i] = (zgram_data_batch['res_id'][n_i], zgram_data_batch['zernikegram'][n_i], zgram_data_batch['label'][n_i],)
+                
+                n += n_added_zgrams
+                
+                bar.update(task, advance=1)
+            
+            f["data"].resize((n,))
+
+    return hdf5_name
+
+
+def predict_from_hdf5file(hdf5_file: str,
+                          models: List,
+                          hparams: Dict,
+                          batch_size: int,
+                          regions: Optional[Dict[str, List[Tuple[str, int, str]]]] = None):
+    '''
+    NOTE: requested chains are already handled in the creation of the hdf5 file, so no need to worry about that here
+    '''
+    data_irreps, ls_indices = get_data_irreps(hparams)
+
+    with h5py.File(hdf5_file, 'r') as f:
+        zgrams_dict = {'res_id': f['data']['res_id'][:], 'zernikegram': f['data']['zernikegram'][:]}
+
+    if regions is None: # return the predictions
+        ensemble_predictions_dict = predict_from_zernikegrams(zgrams_dict['zernikegram'], zgrams_dict['res_id'], models, batch_size, data_irreps)
+    else: # return the predictions for each region, in a dict indexed by region_name
+        ensemble_predictions_dict = {}
+        for region_name in regions:
+            ensemble_predictions_dict[region_name] = predict_from_zernikegrams(zgrams_dict['zernikegram'], zgrams_dict['res_id'], models, batch_size, data_irreps, region=regions[region_name])
+    
+    return ensemble_predictions_dict
+
 
 # @profile
 def predict_from_pdbfile(pdb_file: str,
                           models: List,
-                          hparams: List[Dict],
+                          hparams: Dict,
                           batch_size: int,
+                          add_same_noise_level_as_training: bool = False,
                           chain: Optional[str] = None,
                           regions: Optional[Dict[str, List[Tuple[str, int, str]]]] = None):
 
@@ -156,6 +326,12 @@ def predict_from_pdbfile(pdb_file: str,
                                   'hydrogens': 'H' in channels,
                                   'extra_molecules': hparams['extra_molecules'],
                                   'multi_struct': 'warn'}
+    
+    if add_same_noise_level_as_training:
+        add_noise_kwargs = {'noise': hparams['noise'],
+                            'noise_seed': hparams['noise_seed']}
+    else:
+        add_noise_kwargs = None
 
     get_neighborhoods_kwargs = {'r_max': hparams['rcut'],
                                 'remove_central_residue': hparams['remove_central_residue'],

@@ -55,7 +55,7 @@ def get_file_that_matches_specs(inference_dir, model_version, pdb, chain, resnum
 import stopit
 
 @stopit.threading_timeoutable(60*10) # stop it if it takes more than 10 minutes
-def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, models, hparams, ensemble_at_logits_level):
+def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, models, hparams, ensemble_at_logits_level, add_same_noise_level_as_training):
 
     # ## do not make predictions if they already exist (nice if some error or timehout happened on some PDB)
     # if os.path.exists(os.path.join(output_dir, f"{make_filename(model_version, pdb, chain, resnums)}.npz")):
@@ -72,7 +72,7 @@ def make_prediction(output_dir, pdbdir, chain, pdb, resnums, model_version, mode
 
     requested_regions = {'region': region_ids}
     try:
-        ensemble_predictions_dict = predict_from_pdbfile(os.path.join(pdbdir, f'{pdb}.pdb'), models, hparams, 256, regions=requested_regions)
+        ensemble_predictions_dict = predict_from_pdbfile(os.path.join(pdbdir, f'{pdb}.pdb'), models, hparams, 256, regions=requested_regions, add_same_noise_level_as_training=add_same_noise_level_as_training)
     except Exception as e:
         print(f'Error making predictions for {pdb} {chain} {resnums}: {e}')
         return
@@ -116,6 +116,9 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str, required=True,
                         help='Output directory for the results. The directory will contain subdirectory "inference" with .npz files containing batch prediction information (can be discarded), \
                               and subdirectory "zero_shot_predictions" with the CSV file containing the results.')
+
+    parser.add_argument('--add_same_noise_level_as_training', type=int, default=0, choices=[0, 1],
+                        help='1 for True, 0 for False. If True, will add the same noise level as was used during training. This is useful for debugging purposes. Default is False.')
 
     parser.add_argument('--wt_pdb_column', type=str, required=True,
                         help='Column name with the wildtype PDB file')
@@ -255,7 +258,7 @@ if __name__ == '__main__':
                 resnums_chunks = [resnums[i:i+CHUNK_SIZE] for i in range(0, len(resnums), CHUNK_SIZE)]
                 for res_chunk in resnums_chunks:
                     # print(f'Running inference for {pdb} {chain} {res_chunk}')
-                    make_prediction(inference_dir, args.folder_with_pdbs, chain, pdb, res_chunk, args.model_version, models, hparams, args.ensemble_at_logits_level)
+                    make_prediction(inference_dir, args.folder_with_pdbs, chain, pdb, res_chunk, args.model_version, models, hparams, args.ensemble_at_logits_level, args.add_same_noise_level_as_training)
     end = time()
     print(f'Inference took {end - start} seconds')
 

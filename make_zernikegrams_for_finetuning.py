@@ -60,15 +60,15 @@ if __name__ == '__main__':
         channels = get_channels(hparams['channels'])
 
         get_structural_info_kwargs = {'padded_length': None,
-                                    'parser': hparams['parser'],
-                                    'SASA': 'SASA' in channels,
-                                    'charge': 'charge' in channels,
-                                    'DSSP': False,
-                                    'angles': False,
-                                    'fix': True,
-                                    'hydrogens': 'H' in channels,
-                                    'extra_molecules': hparams['extra_molecules'],
-                                    'multi_struct': 'warn'}
+                                        'parser': hparams['parser'],
+                                        'SASA': 'SASA' in channels,
+                                        'charge': 'charge' in channels,
+                                        'DSSP': False,
+                                        'angles': False,
+                                        'fix': True,
+                                        'hydrogens': 'H' in channels,
+                                        'extra_molecules': hparams['extra_molecules'],
+                                        'multi_struct': 'warn'}
 
         add_noise_kwargs = {'noise': hparams['noise'],
                             'noise_seed': hparams['noise_seed']}

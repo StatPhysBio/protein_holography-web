@@ -1,6 +1,6 @@
 
 
-model_version_list='esm_1v_masked_marginals esm_1v_wt_marginals'
+model_version_list='esm_1v_wt_marginals'
 
 
 use_mt_structure='0'

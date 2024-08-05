@@ -19,7 +19,7 @@ from time import time
 from scipy.special import softmax, log_softmax
 from sklearn.metrics import accuracy_score
 
-from protein_holography_web.inference.hcnn_inference import predict_from_hdf5file, predict_from_pdbfile, load_hcnn_models
+from protein_holography_web.inference.hcnn_inference import predict_from_hdf5file, predict_from_pdbfile, load_hcnn_models, get_zernikegrams_in_parallel
 from protein_holography_web.utils.protein_naming import ind_to_ol_size, ol_to_ind_size
 
 import argparse
@@ -57,11 +57,17 @@ if __name__ == '__main__':
                               If not specified, and --folder_with_pdbs is specified, inference will be run on all sites in the structure.\n \
                               If specified, each line should be in the format "pdbid chain"; if chain is not specified for a given line, inference will be run on all chains in that structure.')
     
+    parser.add_argument('-pp', '--parallelism', type=int, default=0,
+                        help='If zero (default), pdb files are processed one by one. If one, pdb files are processed in parallel with specified parallelism (and number of cores available), by first generating zernikegrams in a temporary hdf5 file.')
+
     parser.add_argument('-o', '--output_filepath', type=str, required=True,
                         help='Must be a ".csv file". Embeddings will be saved separately, in a parallel array, with the same filename but with the extension "-embeddings.npy".')
     
     parser.add_argument('-r', '--request', nargs='+', type=str, default='probas', choices=['logprobas', 'probas', 'embeddings', 'logits'],
                         help='Which data to return. Can be a combination of "logprobas", "probas", "embeddings", and "logits".')
+    
+    parser.add_argument('-an', '--add_same_noise_level_as_training', type=int, default=0, choices=[0, 1],
+                        help='1 for True, 0 for False. If True, will add the same noise level as was used during training. This is useful for debugging purposes. Default is False.')
     
     parser.add_argument('-el', '--ensemble_at_logits_level', default=0, type=int, choices=[0, 1],
                         help="1 for True, 0 for False. When computing probabilities and log-probabilities, ensembles the logits before computing the softmax, as opposed to ansembling the individual models' probabilities.\n \
@@ -145,8 +151,12 @@ if __name__ == '__main__':
     ## run inference
     if args.hdf5_file is not None:
         if args.verbose: print(f'Running inference on zernikegrams in the .hdf5 file: {args.hdf5_file}')
-        inference = predict_from_hdf5file()
-        if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
+        inference = predict_from_hdf5file(args.hdf5_file, models, hparams, args.batch_size)
+
+        if len(inference['best_indices'].shape) == 2:
+            if args.verbose: print('Accuracy of first model in ensemble: %.3f' % accuracy_score(inference['targets'], inference['best_indices'][0, :]))
+        else:
+            if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
 
     elif args.folder_with_pdbs is not None:
 
@@ -179,27 +189,45 @@ if __name__ == '__main__':
 
         if args.verbose: print(f'Running inference on {len(pdb_files)} pdb files found in: {args.folder_with_pdbs}')
 
-        if args.loading_bar:
-            pdb_files_and_chains = tqdm(zip(pdb_files, chains), total=len(pdb_files))
-        else:
-            pdb_files_and_chains = zip(pdb_files, chains)
+        pdb_files_and_chains = zip(pdb_files, chains)
+        
+        if args.parallelism:
 
-        for pdbfile, chain in pdb_files_and_chains:
-            if args.verbose: print(f'Running inference on pdb file: {pdbfile}')
+            if args.verbose: print(f'Running inference in parallel with parallelism: {args.parallelism}')
 
-            try:
-                inference = predict_from_pdbfile(pdbfile, models, hparams, args.batch_size, chain=chain)
-            except Exception as e:
-                print(f'Error running inference on pdb file: {pdbfile}')
-                print(f'Error message: {e}')
-                continue
+            zernikegrams_hdf5_file = get_zernikegrams_in_parallel(args.folder_with_pdbs, pdb_files_and_chains, hparams, args.parallelism, add_same_noise_level_as_training=args.add_same_noise_level_as_training)
+
+            inference = predict_from_hdf5file(zernikegrams_hdf5_file, models, hparams, args.batch_size)
 
             if len(inference['best_indices'].shape) == 2:
                 if args.verbose: print('Accuracy of first model in ensemble: %.3f' % accuracy_score(inference['targets'], inference['best_indices'][0, :]))
             else:
                 if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
+
+            os.remove(zernikegrams_hdf5_file)
             
             df_out, embeddings_out = update_output(inference, df_out, embeddings_out)
+
+        else:
+            if args.loading_bar:
+                pdb_files_and_chains = tqdm(zip(pdb_files, chains), total=len(pdb_files))
+            
+            for pdbfile, chain in pdb_files_and_chains:
+                if args.verbose: print(f'Running inference on pdb file: {pdbfile}')
+
+                try:
+                    inference = predict_from_pdbfile(pdbfile, models, hparams, args.batch_size, chain=chain, add_same_noise_level_as_training=args.add_same_noise_level_as_training)
+                except Exception as e:
+                    print(f'Error running inference on pdb file: {pdbfile}')
+                    print(f'Error message: {e}')
+                    continue
+
+                if len(inference['best_indices'].shape) == 2:
+                    if args.verbose: print('Accuracy of first model in ensemble: %.3f' % accuracy_score(inference['targets'], inference['best_indices'][0, :]))
+                else:
+                    if args.verbose: print('Accuracy: %.3f' % accuracy_score(inference['targets'], inference['best_indices']))
+                
+                df_out, embeddings_out = update_output(inference, df_out, embeddings_out)
 
     else:
         raise ValueError('Either --hdf5_file or --folder_with_pdbs must be specified.')
