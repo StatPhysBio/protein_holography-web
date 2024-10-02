@@ -1,6 +1,6 @@
 # HERMES: Holographic Equivariant neuRal network model for Mutational Effect and Stability prediction
 
-* Check out our updated repository at https://github.com/StatPhysBio/hermes *
+**Check out our updated repository at https://github.com/StatPhysBio/hermes**
 
 Code for the paper [HERMES: Holographic Equivariant neuRal network model for Mutational Effect and Stability prediction](https://www.biorxiv.org/content/10.1101/2024.07.09.602403v1.full).
 
